@@ -57,6 +57,10 @@ app path). It drives Firefox over Marionette, loads the extension temporarily,
 serves `e2e/mock/pilgrim-details.html` (a React controlled form with the TTD
 field names) at the real hostname through a local HTTP proxy, fills it from the
 on-page button and from the popup message path, and checks React's state.
+`HEADED=1 KEEP_OPEN=1 npm run test:e2e` runs it in a visible, slowed-down
+Firefox window and leaves that window open with the extension loaded, so you
+can try the popup and the on-page button by hand (and sign in to the real site
+in the same window: only plain HTTP is proxied to the mock).
 
 Layout:
 

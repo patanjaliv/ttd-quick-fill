@@ -34,11 +34,14 @@ export class Marionette {
       error ? p.reject(new Error(`${error.error}: ${error.message}`)) : p.resolve(result);
     }
   }
-  send(cmd, params = {}) {
+  async send(cmd, params = {}) {
     const id = ++this.id;
     const body = JSON.stringify([0, id, cmd, params]);
     this.sock.write(`${Buffer.byteLength(body)}:${body}`);
-    return new Promise((resolve, reject) => this.pending.set(id, { resolve, reject }));
+    const result = await new Promise((resolve, reject) => this.pending.set(id, { resolve, reject }));
+    // In headed mode, linger after each visible action so a person can follow along.
+    if (this.stepDelay && /Navigate|ElementClick|ElementSendKeys|SwitchToWindow/.test(cmd)) await sleep(this.stepDelay);
+    return result;
   }
   async newSession() { return this.send("WebDriver:NewSession", { capabilities: { alwaysMatch: { acceptInsecureCerts: true } } }); }
   navigate(url) { return this.send("WebDriver:Navigate", { url }); }
