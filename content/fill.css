@@ -1,17 +1,19 @@
+/* On-page widgets styled with the TTD site's own maroon/gold palette so they sit naturally on the form. */
 #ttdqf-fab {
   position: fixed; right: 18px; bottom: 18px; z-index: 2147483646;
-  padding: 10px 16px; border: 0; border-radius: 999px; cursor: pointer;
-  background: #c2410c; color: #fff; font: 600 14px/1 system-ui, -apple-system, sans-serif;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  padding: 11px 18px; border: 2px solid #f2c65d; border-radius: 999px; cursor: pointer;
+  background: #a10007; color: #fff; font: 600 14px/1 "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  box-shadow: 0 6px 20px rgba(161, 0, 7, .35);
 }
-#ttdqf-fab:hover { background: #9a3412; }
+#ttdqf-fab::before { content: "ॐ "; color: #f2c65d; }
+#ttdqf-fab:hover { background: #7d0005; }
 #ttdqf-status {
-  position: fixed; right: 18px; bottom: 66px; z-index: 2147483647; max-width: 340px;
-  padding: 10px 14px; border-radius: 10px; border: 1px solid #0003;
-  background: #fff; color: #1f2937; font: 500 13px/1.4 system-ui, -apple-system, sans-serif;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+  position: fixed; right: 18px; bottom: 70px; z-index: 2147483647; max-width: 340px;
+  padding: 10px 14px; border-radius: 10px; border: 1px solid #f2c65d; border-left-width: 5px;
+  background: #fefbd5; color: #233443; font: 500 13px/1.4 "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  box-shadow: 0 8px 24px rgba(35, 52, 67, .25);
 }
-#ttdqf-status[data-state="ok"] { border-color: #16a34a; }
-#ttdqf-status[data-state="warn"] { border-color: #d97706; }
-#ttdqf-status[data-state="error"] { border-color: #dc2626; }
-#ttdqf-status[data-state="busy"] { border-color: #2563eb; }
+#ttdqf-status[data-state="ok"] { border-left-color: #0c5273; }
+#ttdqf-status[data-state="warn"] { border-left-color: #d9a93a; }
+#ttdqf-status[data-state="error"] { border-left-color: #a10007; background: #fdf1f4; }
+#ttdqf-status[data-state="busy"] { border-left-color: #a10007; }

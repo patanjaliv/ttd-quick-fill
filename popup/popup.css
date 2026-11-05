@@ -1,32 +1,82 @@
-:root { color-scheme: light dark; --accent: #c2410c; --accent-dark: #9a3412; --line: #8884; }
+/* Palette taken from the TTD booking site's own design tokens (maroon primary,
+   cream/gold secondaries, slate text) so the popup feels familiar next to it.
+   The site's JioType/Hoefler fonts are proprietary; Open Sans + a serif fallback
+   are used instead, without loading anything remote. */
+:root {
+  color-scheme: light dark;
+  --ttd-primary: #a10007;
+  --ttd-primary-dark: #7d0005;
+  --ttd-cream: #fefbd5;
+  --ttd-gold: #f2c65d;
+  --ttd-gold-dark: #d9a93a;
+  --ttd-sand: #f8dcaa;
+  --ttd-bg: #fdf1f4;
+  --ttd-text: #233443;
+  --ttd-muted: #707070;
+  --ttd-green: #0c5273;
+  --card: #fff;
+  --line: #f8dcaa;
+  --danger: #a10007;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ttd-bg: #1b1416; --card: #261b1e; --line: #5a4530; --ttd-text: #f3e9dc; --ttd-muted: #b9a79a; }
+}
 * { box-sizing: border-box; }
-body { width: 360px; margin: 0; padding: 12px 14px 14px; font: 14px/1.45 system-ui, -apple-system, sans-serif; }
-h1 { margin: 0; font-size: 18px; }
-h2 { margin: 12px 0 6px; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
-.muted { opacity: .7; margin: 2px 0 0; }
+body {
+  width: 370px; margin: 0; padding: 0 0 14px;
+  background: var(--ttd-bg); color: var(--ttd-text);
+  font: 14px/1.45 "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+header {
+  background: var(--ttd-primary); color: #fff; padding: 12px 16px 10px;
+  border-bottom: 4px solid var(--ttd-gold);
+}
+header h1 { margin: 0; font: 600 20px/1.2 "Hoefler Text", Georgia, "Times New Roman", serif; letter-spacing: .01em; }
+header h1::before { content: "ॐ "; color: var(--ttd-gold); }
+header .muted { color: var(--ttd-cream); opacity: .95; font-size: 12px; margin-top: 2px; }
+section, form, details, footer { margin: 12px 14px 0; }
+h2 { margin: 0 0 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ttd-primary); }
+@media (prefers-color-scheme: dark) { h2 { color: var(--ttd-gold); } }
+.muted { color: var(--ttd-muted); margin: 2px 0 0; }
 .tiny { font-size: 12px; }
 .row-between { display: flex; align-items: center; justify-content: space-between; }
-.list { list-style: none; margin: 0; padding: 0; }
-.list li { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.list { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.list:empty { display: none; }
+.list li { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.list li:last-child { border-bottom: 0; }
 .list .who { font-weight: 600; }
-.list .meta { font-size: 12px; opacity: .7; }
-.list button { font-size: 12px; }
-label { display: block; margin: 6px 0; font-size: 13px; }
-input, select { width: 100%; padding: 6px 8px; margin-top: 2px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: transparent; color: inherit; }
-form { padding: 10px; margin: 10px 0; border: 1px solid var(--line); border-radius: 10px; }
-.actions { display: flex; gap: 8px; margin-top: 8px; }
-button { cursor: pointer; border-radius: 8px; border: 1px solid var(--line); padding: 7px 12px; font: inherit; background: transparent; color: inherit; }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-.btn-primary:hover { background: var(--accent-dark); }
+.list .meta { font-size: 12px; color: var(--ttd-muted); }
+.list button { font-size: 12px; padding: 5px 9px; }
+.list input[type="checkbox"] { accent-color: var(--ttd-primary); width: 16px; height: 16px; }
+label { display: block; margin: 6px 0; font-size: 13px; font-weight: 600; }
+input:not([type="checkbox"]), select {
+  width: 100%; padding: 7px 9px; margin-top: 3px; border: 1px solid var(--line); border-radius: 6px;
+  font: inherit; font-weight: 400; background: var(--card); color: inherit;
+}
+input:focus, select:focus { outline: 2px solid var(--ttd-gold); outline-offset: 1px; border-color: var(--ttd-gold-dark); }
+form { padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+form h2 { margin-bottom: 2px; }
+.actions { display: flex; gap: 8px; margin-top: 10px; }
+button { cursor: pointer; border-radius: 6px; border: 1px solid var(--ttd-gold-dark); padding: 7px 12px; font: inherit; font-weight: 600; background: var(--ttd-cream); color: var(--ttd-primary); }
+@media (prefers-color-scheme: dark) { button { background: #3a2a10; color: var(--ttd-gold); } }
+button:hover { filter: brightness(.96); }
+.btn-primary { background: var(--ttd-primary); border-color: var(--ttd-primary); color: #fff; }
+.btn-primary:hover { background: var(--ttd-primary-dark); filter: none; }
 .btn-primary:disabled { opacity: .6; cursor: default; }
-.btn-danger { color: #dc2626; }
-.error { color: #dc2626; margin: 6px 0 0; font-size: 12px; white-space: pre-line; }
+.btn-secondary { background: var(--card); }
+.btn-danger { color: var(--danger); background: var(--card); border-color: var(--line); }
+.error { color: var(--danger); margin: 6px 0 0; font-size: 12px; white-space: pre-line; }
 .error:empty { display: none; }
-.status { margin: 8px 0 0; font-size: 13px; white-space: pre-line; }
+.status { margin: 8px 0 0; padding: 8px 10px; font-size: 13px; white-space: pre-line; background: var(--ttd-cream); color: #233443; border: 1px solid var(--ttd-gold); border-radius: 8px; }
 .status:empty { display: none; }
-details { margin-top: 12px; }
-summary { cursor: pointer; font-weight: 600; }
-footer { margin-top: 14px; }
-footer .btn-primary { width: 100%; padding: 10px; font-size: 15px; }
-.banner { margin: 10px 0; padding: 10px; border: 1px solid #d97706; border-radius: 10px; background: #d9770614; }
+details { padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+details form { margin: 8px 0 0; padding: 0; border: 0; background: transparent; }
+summary { cursor: pointer; font-weight: 600; color: var(--ttd-primary); }
+@media (prefers-color-scheme: dark) { summary { color: var(--ttd-gold); } }
+footer .btn-primary { width: 100%; padding: 11px; font-size: 15px; border-radius: 8px; box-shadow: 0 3px 0 var(--ttd-gold); }
+footer .btn-primary:active { box-shadow: none; transform: translateY(2px); }
+footer .tiny { margin-top: 10px; }
+footer a { color: var(--ttd-green); }
+@media (prefers-color-scheme: dark) { footer a { color: var(--ttd-gold); } }
+.banner { padding: 10px 12px; border: 1px solid var(--ttd-gold); border-radius: 10px; background: var(--ttd-cream); color: #233443; }
 .banner p { margin: 0 0 8px; }
