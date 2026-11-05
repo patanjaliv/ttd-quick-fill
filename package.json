@@ -6,8 +6,9 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test tests/",
-    "lint": "web-ext lint --source-dir . --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'package.json' 'package-lock.json' '*.md'",
-    "build": "web-ext build --source-dir . --artifacts-dir dist --overwrite-dest --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'package.json' 'package-lock.json' '*.md'"
+    "test:e2e": "node e2e/run.mjs",
+    "lint": "web-ext lint --source-dir . --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'package.json' 'package-lock.json' '*.md'",
+    "build": "web-ext build --source-dir . --artifacts-dir dist --overwrite-dest --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'package.json' 'package-lock.json' '*.md'"
   },
   "devDependencies": { "web-ext": "^8.0.0" }
 }

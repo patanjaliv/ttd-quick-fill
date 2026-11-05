@@ -28,7 +28,9 @@ Malayalam UI.
 "Load unpacked" → pick this folder.
 
 **Firefox:** `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on"
-→ pick `manifest.json`. For a permanent install, build the zip and sign it on
+→ pick `manifest.json`. If the popup shows a **Grant access to TTD sites**
+banner, press it once (site access can also be toggled under about:addons →
+TTD Quick Fill → Permissions). For a permanent install, build the zip and sign it on
 addons.mozilla.org (unlisted self-distribution is fine).
 
 Permissions: `storage` (your saved pilgrims) and access to the two TTD sites
@@ -47,7 +49,14 @@ only. No background script, no debugger permission.
 npm test                      # unit tests (node:test)
 npm run lint                  # web-ext lint
 npm run build                 # zip into dist/
+npm run test:e2e              # headless Firefox end-to-end test (see below)
 ```
+
+The end-to-end test needs a local Firefox (`FIREFOX_BIN` defaults to the macOS
+app path). It drives Firefox over Marionette, loads the extension temporarily,
+serves `e2e/mock/pilgrim-details.html` (a React controlled form with the TTD
+field names) at the real hostname through a local HTTP proxy, fills it from the
+on-page button and from the popup message path, and checks React's state.
 
 Layout:
 
@@ -58,6 +67,7 @@ Layout:
 | `popup/` | pilgrim and contact management, fill trigger |
 | `shared/validate.js` | pure validation (Aadhaar Verhoeff check etc.) |
 | `tests/` | unit tests |
+| `e2e/` | headless-Firefox end-to-end test with a mock TTD form |
 
 The TTD site is a React single-page app with combo-box inputs; text is written
 through `document.execCommand('insertText')` so React sees ordinary input
@@ -69,8 +79,9 @@ the constants at the top of `content/fill.js`.
 Written from scratch and MIT-licensed. The author examined an existing
 closed-source Chrome extension to learn the TTD form's field names, which are
 facts about the TTD website; no code from it is reused and the design differs
-(no debugger API, no background script). Status: v0.1.0 has not yet been
-exercised against the live TTD forms. Please open an issue with the page URL
+(no debugger API, no background script). Status: v0.1.0 passes the end-to-end
+test against a mock of the form on Firefox 159 but has not yet been exercised
+against the live TTD site. Please open an issue with the page URL
 and the field that stayed empty if a fill fails.
 
 ## Privacy
