@@ -10,6 +10,9 @@ import { Marionette, sleep } from "./marionette.mjs";
 const E2E = new URL(".", import.meta.url).pathname;
 const S = E2E + "work/";
 const FIREFOX = process.env.FIREFOX_BIN || "/Applications/Firefox.app/Contents/MacOS/firefox";
+// HEADED=1 shows the Firefox window and slows each step down; KEEP_OPEN=1 leaves Firefox and the
+// mock server running after the test so the extension can be tried by hand in that window.
+const HEADED = !!process.env.HEADED, KEEP_OPEN = !!process.env.KEEP_OPEN;
 const profile = S + "profile";
 fs.rmSync(S, { recursive: true, force: true });
 fs.mkdirSync(S + "out", { recursive: true });
@@ -26,7 +29,7 @@ for (const [file, url] of [["react.js", "https://unpkg.com/react@18.3.1/umd/reac
   if (!fs.existsSync(cached)) execFileSync("curl", ["-sfL", "-o", cached, url]);
   fs.copyFileSync(cached, S + "mock/" + file);
 }
-const server = spawn("python3", [E2E + "serve.py", S + "mock"], { stdio: "ignore" });
+const server = spawn("python3", [E2E + "serve.py", S + "mock"], { stdio: "ignore", detached: KEEP_OPEN });
 fs.mkdirSync(profile, { recursive: true });
 fs.writeFileSync(profile + "/user.js", `
 user_pref("marionette.port", 2828);
@@ -46,8 +49,10 @@ user_pref("dom.security.https_first", false);
 user_pref("dom.security.https_only_mode", false);
 user_pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
 `);
-const ff = spawn(FIREFOX, ["-marionette", "-headless", "-no-remote", "-profile", profile], { stdio: "ignore", env: { ...process.env, MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: "1" } });
+const ff = spawn(FIREFOX, ["-marionette", ...(HEADED ? [] : ["-headless"]), "-no-remote", "-profile", profile],
+  { stdio: "ignore", detached: KEEP_OPEN, env: { ...process.env, MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: "1" } });
 const m = new Marionette();
+m.stepDelay = HEADED ? 1500 : 0;
 const out = {};
 try {
   await m.connect();
@@ -127,7 +132,11 @@ try {
 } catch (e) {
   out.error = String(e.stack || e);
 } finally {
-  await m.quit(); m.close(); ff.kill(); server.kill();
+  if (KEEP_OPEN) {
+    // Leave the filled page in front and detach so this process can exit while Firefox stays open.
+    m.close(); ff.unref(); server.unref();
+    console.error("Firefox left open with the extension loaded (temporary profile at " + profile + "). Mock page: http://ttdevasthanams.ap.gov.in/pilgrim-details  — close the window when done.");
+  } else { await m.quit(); m.close(); ff.kill(); server.kill(); }
 }
 const filledBoth = (r) => r && r.ok && r.filled.length === 2 && r.warnings.length === 0;
 const stateOk = (txt) => { try { const s = JSON.parse(txt); return s.rows[0].idProofNumber === "999912345676" && s.rows[1].gender === "Female" && s.general.pincode === "517501"; } catch { return false; } };
