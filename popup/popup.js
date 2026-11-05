@@ -4,6 +4,7 @@ const ext = globalThis.browser ?? globalThis.chrome;
 const $ = (sel) => document.querySelector(sel);
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `p-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
+const TTD_ORIGINS = ["https://ttdevasthanams.ap.gov.in/*", "https://tirupatibalaji.ap.gov.in/*"];
 const load = () => ext.storage.local.get({ pilgrims: [], contact: {} });
 const save = (patch) => ext.storage.local.set(patch);
 
@@ -131,5 +132,22 @@ $("#fill").addEventListener("click", async () => {
   }
 });
 
+// ----------------------------------------------------------- permissions --
+// Firefox treats MV3 host permissions as optional: a temporarily loaded add-on
+// starts without them, and users can switch them off in about:addons. Chrome
+// grants them at install, so the banner never shows there.
+async function renderPermissionBanner() {
+  if (!ext.permissions) return;
+  const granted = await ext.permissions.contains({ origins: TTD_ORIGINS }).catch(() => true);
+  $("#perm-banner").hidden = granted;
+}
+$("#grant-access").addEventListener("click", async () => {
+  // Must stay inside the click handler: the browser only honours requests made from a user action.
+  const ok = await ext.permissions.request({ origins: TTD_ORIGINS }).catch(() => false);
+  if (ok) $("#perm-banner").hidden = true;
+  else setStatus("Access was not granted. You can also enable it under about:addons → TTD Quick Fill → Permissions.");
+});
+
+renderPermissionBanner();
 renderList();
 renderContact();

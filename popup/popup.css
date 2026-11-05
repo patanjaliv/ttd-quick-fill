@@ -28,3 +28,5 @@ details { margin-top: 12px; }
 summary { cursor: pointer; font-weight: 600; }
 footer { margin-top: 14px; }
 footer .btn-primary { width: 100%; padding: 10px; font-size: 15px; }
+.banner { margin: 10px 0; padding: 10px; border: 1px solid #d97706; border-radius: 10px; background: #d9770614; }
+.banner p { margin: 0 0 8px; }
