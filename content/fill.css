@@ -1,0 +1,17 @@
+#ttdqf-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 2147483646;
+  padding: 10px 16px; border: 0; border-radius: 999px; cursor: pointer;
+  background: #c2410c; color: #fff; font: 600 14px/1 system-ui, -apple-system, sans-serif;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+}
+#ttdqf-fab:hover { background: #9a3412; }
+#ttdqf-status {
+  position: fixed; right: 18px; bottom: 66px; z-index: 2147483647; max-width: 340px;
+  padding: 10px 14px; border-radius: 10px; border: 1px solid #0003;
+  background: #fff; color: #1f2937; font: 500 13px/1.4 system-ui, -apple-system, sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+#ttdqf-status[data-state="ok"] { border-color: #16a34a; }
+#ttdqf-status[data-state="warn"] { border-color: #d97706; }
+#ttdqf-status[data-state="error"] { border-color: #dc2626; }
+#ttdqf-status[data-state="busy"] { border-color: #2563eb; }

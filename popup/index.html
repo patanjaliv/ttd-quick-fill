@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TTD Quick Fill</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>TTD Quick Fill</h1>
+    <p class="muted">Unofficial. Data stays in this browser.</p>
+  </header>
+
+  <section>
+    <div class="row-between">
+      <h2>Pilgrims</h2>
+      <button type="button" id="add-pilgrim" class="btn-secondary">+ Add</button>
+    </div>
+    <ul id="pilgrim-list" class="list"></ul>
+    <p id="pilgrim-empty" class="muted">No pilgrims saved yet.</p>
+  </section>
+
+  <form id="pilgrim-form" hidden>
+    <h2 id="form-title">Add pilgrim</h2>
+    <input type="hidden" name="id">
+    <label>Name <input name="name" autocomplete="off" required></label>
+    <label>Age <input name="age" inputmode="numeric" autocomplete="off" required></label>
+    <label>Gender <select name="gender"></select></label>
+    <label>ID type <select name="idType"></select></label>
+    <label>ID number <input name="idNumber" inputmode="numeric" autocomplete="off" required></label>
+    <p id="form-errors" class="error" role="alert"></p>
+    <div class="actions">
+      <button type="submit" class="btn-primary">Save</button>
+      <button type="button" id="cancel-pilgrim" class="btn-secondary">Cancel</button>
+    </div>
+  </form>
+
+  <details id="contact-section">
+    <summary>Contact / general details (optional)</summary>
+    <form id="contact-form">
+      <label>Email <input name="email" type="email" autocomplete="off"></label>
+      <label>City <input name="city" autocomplete="off"></label>
+      <label>State <input name="state" autocomplete="off"></label>
+      <label>Country <input name="country" autocomplete="off"></label>
+      <label>PIN code <input name="pincode" inputmode="numeric" autocomplete="off"></label>
+      <p id="contact-errors" class="error" role="alert"></p>
+      <button type="submit" class="btn-secondary">Save contact</button>
+    </form>
+  </details>
+
+  <footer>
+    <button type="button" id="fill" class="btn-primary">⚡ Fill this page</button>
+    <p id="fill-status" class="status" role="status"></p>
+    <p class="muted tiny">Fills name, age, gender and ID into the open TTD form. It never presses Continue or Pay.
+      <a href="https://github.com/" id="source-link" target="_blank" rel="noopener">Open source (MIT)</a></p>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
