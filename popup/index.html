@@ -11,6 +11,17 @@
     <p class="muted">Unofficial. Data stays in this browser.</p>
   </header>
 
+  <section id="lock-screen" hidden>
+    <form id="unlock-form">
+      <h2>🔒 Locked</h2>
+      <p class="muted tiny">Your saved details are protected with a passphrase. Enter it once per browser session.</p>
+      <label>Passphrase <input name="passphrase" type="password" autocomplete="current-password" required></label>
+      <p id="unlock-error" class="error" role="alert"></p>
+      <button type="submit" class="btn-primary">Unlock</button>
+    </form>
+  </section>
+
+  <div id="main" hidden>
   <section id="perm-banner" class="banner" hidden>
     <p>Firefox has not yet given this extension access to the TTD websites, so filling cannot run.</p>
     <button type="button" id="grant-access" class="btn-primary">Grant access to TTD sites</button>
@@ -53,13 +64,43 @@
     </form>
   </details>
 
+  <details id="security-section">
+    <summary>Passphrase protection <span id="security-state" class="muted tiny"></span></summary>
+    <p class="muted tiny">Encrypts the saved details on this device (AES-256-GCM, key derived from your passphrase). You will be asked for it once per browser session. There is no recovery if you forget it.</p>
+    <form id="enable-form">
+      <label>Passphrase <input name="passphrase" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Confirm <input name="confirm" type="password" autocomplete="new-password" required></label>
+      <p id="enable-errors" class="error" role="alert"></p>
+      <button type="submit" class="btn-primary">Protect my details</button>
+    </form>
+    <div id="protected-tools" hidden>
+      <div class="actions"><button type="button" id="lock-now" class="btn-secondary">🔒 Lock now</button></div>
+      <form id="change-form">
+        <h2>Change passphrase</h2>
+        <label>Current <input name="current" type="password" autocomplete="current-password" required></label>
+        <label>New <input name="passphrase" type="password" autocomplete="new-password" minlength="8" required></label>
+        <label>Confirm <input name="confirm" type="password" autocomplete="new-password" required></label>
+        <p id="change-errors" class="error" role="alert"></p>
+        <button type="submit" class="btn-secondary">Change</button>
+      </form>
+      <form id="remove-form">
+        <h2>Remove protection</h2>
+        <label>Current passphrase <input name="current" type="password" autocomplete="current-password" required></label>
+        <p id="remove-errors" class="error" role="alert"></p>
+        <button type="submit" class="btn-danger">Store details unencrypted</button>
+      </form>
+    </div>
+  </details>
+
   <footer>
     <button type="button" id="fill" class="btn-primary">⚡ Fill this page</button>
     <p id="fill-status" class="status" role="status"></p>
     <p class="muted tiny">Fills name, age, gender and ID into the open TTD form. It never presses Continue or Pay.
       <a href="https://github.com/patanjaliv/ttd-quick-fill" id="source-link" target="_blank" rel="noopener">Open source (MIT)</a></p>
   </footer>
+  </div>
 
+  <script src="../shared/vault.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

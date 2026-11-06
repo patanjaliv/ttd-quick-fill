@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TTD Quick Fill",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Save pilgrim details once and fill TTD (Tirumala) darshan booking forms in one click. Unofficial, free and open source.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -26,6 +26,13 @@
     "https://ttdevasthanams.ap.gov.in/*",
     "https://tirupatibalaji.ap.gov.in/*"
   ],
+  "background": {
+    "scripts": [
+      "shared/vault.js",
+      "background.js"
+    ],
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": [

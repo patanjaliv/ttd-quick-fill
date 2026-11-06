@@ -80,3 +80,10 @@ footer a { color: var(--ttd-green); }
 @media (prefers-color-scheme: dark) { footer a { color: var(--ttd-gold); } }
 .banner { padding: 10px 12px; border: 1px solid var(--ttd-gold); border-radius: 10px; background: var(--ttd-cream); color: #233443; }
 .banner p { margin: 0 0 8px; }
+#lock-screen form { margin-top: 14px; }
+#lock-screen h2 { font-size: 14px; text-transform: none; letter-spacing: 0; }
+#security-section form { margin-top: 10px; }
+#security-section form + form { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+#security-section form h2 { margin-bottom: 0; }
+#security-section .actions { margin-top: 10px; }
+#security-state { font-weight: 400; }

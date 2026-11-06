@@ -236,7 +236,9 @@
     btn.addEventListener("click", async (e) => {
       if (!e.isTrusted || busy) return;
       try {
-        const { pilgrims = [], contact = {} } = await ext.storage.local.get({ pilgrims: [], contact: {} });
+        // The background script reads storage (and decrypts, if a passphrase is set); the key never reaches this page.
+        const { locked, pilgrims, contact } = await ext.runtime.sendMessage({ type: "READ" });
+        if (locked) { setStatus("Locked. Open TTD Quick Fill from the toolbar, enter your passphrase, then try again.", "warn"); return; }
         await fill(pilgrims.filter((p) => p.selected !== false), contact);
       } catch (err) {
         setStatus(/invalidated/i.test(err?.message) ? "Extension was updated — reload this page." : (err?.message || "Fill failed."), "error");
