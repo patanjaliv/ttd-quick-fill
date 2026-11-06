@@ -5,8 +5,14 @@ const $ = (sel) => document.querySelector(sel);
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `p-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 const TTD_ORIGINS = ["https://ttdevasthanams.ap.gov.in/*", "https://tirupatibalaji.ap.gov.in/*"];
-const load = () => ext.storage.local.get({ pilgrims: [], contact: {} });
-const save = (patch) => ext.storage.local.set(patch);
+// Saved details go through the vault, which is a plain pass-through until a passphrase is set.
+const vault = globalThis.TTDQF.vault;
+const load = async () => {
+  const state = await vault.read(ext);
+  if (state.locked) { showLocked(); throw new Error("locked"); }
+  return state;
+};
+const save = (patch) => vault.write(ext, patch).catch((err) => { if (err?.message === "locked") showLocked(); else throw err; });
 
 // ------------------------------------------------------------------ list --
 function el(tag, props = {}, ...children) {
@@ -148,6 +154,87 @@ $("#grant-access").addEventListener("click", async () => {
   else setStatus("Access was not granted. You can also enable it under about:addons → TTD Quick Fill → Permissions.");
 });
 
-renderPermissionBanner();
-renderList();
-renderContact();
+// -------------------------------------------------------------- passphrase --
+function showLocked() {
+  $("#lock-screen").hidden = false;
+  $("#main").hidden = true;
+  $("#unlock-form").elements.passphrase.focus();
+}
+
+async function renderSecurity() {
+  const state = await vault.read(ext);
+  $("#enable-form").hidden = state.protected;
+  $("#protected-tools").hidden = !state.protected;
+  $("#security-state").textContent = state.protected ? "· on" : "· off";
+}
+
+const passphraseErrors = (passphrase, confirm) => {
+  if (passphrase.length < 8) return "Use at least 8 characters.";
+  if (passphrase !== confirm) return "The two passphrases differ.";
+  return "";
+};
+
+$("#unlock-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target, btn = form.querySelector("button");
+  btn.disabled = true;
+  const ok = await vault.unlockWith(ext, form.elements.passphrase.value);
+  btn.disabled = false;
+  if (!ok) { $("#unlock-error").textContent = "Wrong passphrase."; form.elements.passphrase.select(); return; }
+  form.reset();
+  $("#unlock-error").textContent = "";
+  init();
+});
+
+$("#enable-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const err = passphraseErrors(form.elements.passphrase.value, form.elements.confirm.value);
+  $("#enable-errors").textContent = err;
+  if (err) return;
+  form.querySelector("button").disabled = true;
+  await vault.enable(ext, form.elements.passphrase.value);
+  form.reset();
+  form.querySelector("button").disabled = false;
+  await renderSecurity();
+  setStatus("Protected. Your details are now stored encrypted on this device.");
+});
+
+$("#lock-now").addEventListener("click", async () => {
+  await vault.lock(ext);
+  showLocked();
+});
+
+$("#change-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const err = passphraseErrors(form.elements.passphrase.value, form.elements.confirm.value);
+  $("#change-errors").textContent = err;
+  if (err) return;
+  const ok = await vault.changePassphrase(ext, form.elements.current.value, form.elements.passphrase.value);
+  $("#change-errors").textContent = ok ? "" : "Current passphrase is wrong.";
+  if (!ok) return;
+  form.reset();
+  setStatus("Passphrase changed.");
+});
+
+$("#remove-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const ok = await vault.disable(ext, form.elements.current.value);
+  $("#remove-errors").textContent = ok ? "" : "Current passphrase is wrong.";
+  if (!ok) return;
+  form.reset();
+  await renderSecurity();
+  setStatus("Protection removed. Details are stored as plain data again.");
+});
+
+// ------------------------------------------------------------------ init --
+async function init() {
+  const state = await vault.read(ext);
+  if (state.locked) { showLocked(); return; }
+  $("#lock-screen").hidden = true;
+  $("#main").hidden = false;
+  await Promise.all([renderPermissionBanner(), renderList(), renderContact(), renderSecurity()]);
+}
+init();

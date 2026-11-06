@@ -15,12 +15,14 @@ family's details once and fills them into the Tirumala Tirupati Devasthanams
   **Sri PAT** pilgrim-details form (and the General Details block) and the
   **Srivani** form, from a popup button or a floating button on the page.
 - Reports exactly which fields it verified and which you must enter by hand.
+- Optional passphrase protection: the saved details are then stored encrypted
+  (AES-256-GCM, key derived with PBKDF2-SHA256) and unlocked once per browser
+  session. See *Security* below.
 - Never presses Continue, Pay Now or Submit, never solves CAPTCHAs, never
   touches payment.
 
 Roadmap (help welcome): paid-seva and group-seva forms, e-DIP (lucky draw)
-form and date table, passphrase-protected storage, Telugu/Hindi/Tamil/Kannada/
-Malayalam UI.
+form and date table, Telugu/Hindi/Tamil/Kannada/Malayalam UI.
 
 ## Install
 
@@ -35,7 +37,7 @@ banner, press it once (site access can also be toggled under about:addons →
 TTD Quick Fill → Permissions).
 
 Permissions: `storage` (your saved pilgrims) and access to the two TTD sites
-only. No background script, no debugger permission.
+only. No debugger permission, no network access.
 
 ## Use
 
@@ -71,6 +73,8 @@ Layout:
 | `content/fill.js` | form detection, filling and verification, on-page button |
 | `popup/` | pilgrim and contact management, fill trigger |
 | `shared/validate.js` | pure validation (Aadhaar Verhoeff check etc.) |
+| `shared/vault.js` | optional passphrase encryption of the saved details |
+| `background.js` | answers the on-page button with the (decrypted) saved details |
 | `tests/` | unit tests |
 | `e2e/` | headless-Firefox end-to-end test with a mock TTD form |
 
@@ -84,10 +88,33 @@ the constants at the top of `content/fill.js`.
 Written from scratch and MIT-licensed. The author examined an existing
 closed-source Chrome extension to learn the TTD form's field names, which are
 facts about the TTD website; no code from it is reused and the design differs
-(no debugger API, no background script). Status: v0.1.0 passes the end-to-end
+(no debugger API, no synthetic keyboard driver). Status: v0.2.0 passes the end-to-end
 test against a mock of the form on Firefox 159 but has not yet been exercised
 against the live TTD site. Please open an issue with the page URL
 and the field that stayed empty if a fill fails.
+
+## Security
+
+Without a passphrase the details sit as plain JSON in the browser's extension
+storage, readable by anyone with access to the browser profile on disk. Turning
+on **Passphrase protection** in the popup replaces them with one sealed box
+(`shared/vault.js`):
+
+- key: AES-256-GCM, derived with PBKDF2-HMAC-SHA256, 600,000 iterations
+  (OWASP's figure), random 16-byte salt;
+- every write uses a fresh 12-byte IV, and the box's purpose is bound in as
+  associated data; GCM's tag means a wrong passphrase or a tampered box fails
+  loudly, so no separate verifier is stored;
+- after an unlock the raw key is kept in `storage.session` (memory only, gone
+  when the browser closes) so the passphrase is asked once per session;
+  **Lock now** forgets it immediately. Only the popup and the background
+  script can read it; the content script on the TTD page asks the background
+  script for the details and never sees the key;
+- the passphrase is never stored and cannot be recovered.
+
+What it does not protect against: malware running as you while the vault is
+unlocked, a keylogger, or the TTD website itself (the form receives plain text
+when you fill it, as it must).
 
 ## Privacy
 

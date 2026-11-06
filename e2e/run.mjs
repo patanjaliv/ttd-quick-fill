@@ -58,6 +58,8 @@ try {
   await m.connect();
   const session = await m.newSession();
   out.firefox = session.capabilities.browserVersion;
+  // Fail fast instead of hanging for Marionette's default five-minute page-load wait.
+  await m.send("WebDriver:SetTimeouts", { pageLoad: 20000, script: 20000, implicit: 0 });
   // Install the test build and discover its internal UUID (needed for the moz-extension:// popup URL).
   const addon = await m.installAddon(S + "ext");
   out.pass = false;
@@ -129,6 +131,41 @@ try {
       done(await browser.tabs.sendMessage(tab.id, { type: "FILL", pilgrims: pilgrims.filter(p => p.selected !== false), contact })); })().catch(e => done({ error: String(e) }));`);
   await m.switchTo(pageHandle);
   out.messageReactState = await m.exec(`return document.getElementById('state').textContent`);
+
+  // Third path: passphrase protection. Turn it on in the popup, check nothing readable is left in
+  // storage.local, lock, see the on-page button refuse, unlock in the popup, fill from the page again.
+  const typeInto = async (css, text) => m.send("WebDriver:ElementSendKeys", { id: await m.find(css), text });
+  await m.navigate(popupUrl); await sleep(400);
+  await m.exec(`document.getElementById('security-section').open = true`);
+  await typeInto('#enable-form [name="passphrase"]', "e2e-pass-123");
+  await typeInto('#enable-form [name="confirm"]', "e2e-pass-123");
+  await m.click(await m.find('#enable-form button[type="submit"]'));
+  await sleep(3000); // PBKDF2 at 600k iterations
+  out.afterEnableUrl = (await m.send("WebDriver:GetCurrentURL")).value;
+  await m.screenshot(S + "out/popup-after-enable.png");
+  out.afterEnableStatus = await m.exec(`return document.getElementById('fill-status')?.textContent`);
+  out.vaultStorage = await m.execAsync(`const done = arguments[0]; browser.storage.local.get(null).then(all =>
+    done({ keys: Object.keys(all).sort(), plain: /999912345676|Rama Krishna|517501/.test(JSON.stringify(all)) }));`);
+  out.securityState = await m.exec(`return document.getElementById('security-state').textContent`);
+  await m.click(await m.find("#lock-now")); await sleep(300);
+  out.lockScreenShown = await m.exec(`return !document.getElementById('lock-screen').hidden && document.getElementById('main').hidden`);
+  await m.navigate("http://ttdevasthanams.ap.gov.in/pilgrim-details"); await sleep(800);
+  await m.click(await m.find("#ttdqf-fab")); await sleep(1000);
+  out.lockedStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
+  out.lockedDomValues = await m.exec(`return [...document.querySelectorAll('input')].filter(i => i.value).length`);
+  await m.navigate(popupUrl); await sleep(400);
+  await typeInto('#unlock-form [name="passphrase"]', "wrong-pass");
+  await m.click(await m.find('#unlock-form button[type="submit"]')); await sleep(2500);
+  out.wrongPassError = await m.exec(`return document.getElementById('unlock-error').textContent`);
+  await m.exec(`document.querySelector('#unlock-form [name="passphrase"]').value = ""`);
+  await typeInto('#unlock-form [name="passphrase"]', "e2e-pass-123");
+  await m.click(await m.find('#unlock-form button[type="submit"]')); await sleep(3000);
+  out.unlockedListNames = await m.exec(`return [...document.querySelectorAll('#pilgrim-list .who')].map(e => e.textContent)`);
+  await m.screenshot(S + "out/popup-security.png");
+  await m.navigate("http://ttdevasthanams.ap.gov.in/pilgrim-details"); await sleep(800);
+  await m.click(await m.find("#ttdqf-fab")); await sleep(4000);
+  out.vaultStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
+  out.vaultReactState = await m.exec(`return document.getElementById('state').textContent`);
 } catch (e) {
   out.error = String(e.stack || e);
 } finally {
@@ -140,7 +177,11 @@ try {
 }
 const filledBoth = (r) => r && r.ok && r.filled.length === 2 && r.warnings.length === 0;
 const stateOk = (txt) => { try { const s = JSON.parse(txt); return s.rows[0].idProofNumber === "999912345676" && s.rows[1].gender === "Female" && s.general.pincode === "517501"; } catch { return false; } };
-out.pass = !out.error && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState);
+const vaultOk = out.vaultStorage?.keys?.includes("vault") && !out.vaultStorage.keys.includes("pilgrims") && out.vaultStorage.plain === false
+  && out.lockScreenShown === true && /Locked/.test(out.lockedStatus || "") && out.lockedDomValues === 0
+  && /Wrong/.test(out.wrongPassError || "") && out.unlockedListNames?.length === 2
+  && /Filled 2 of 2/.test(out.vaultStatus || "") && stateOk(out.vaultReactState);
+out.pass = !out.error && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState) && !!vaultOk;
 console.log(JSON.stringify(out, null, 1));
 console.log(out.pass ? "E2E PASS" : "E2E FAIL");
 process.exit(out.pass ? 0 : 1);
