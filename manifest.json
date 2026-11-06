@@ -3,31 +3,57 @@
   "name": "TTD Quick Fill",
   "version": "0.1.0",
   "description": "Save pilgrim details once and fill TTD (Tirumala) darshan booking forms in one click. Unofficial, free and open source.",
-  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "action": {
     "default_title": "TTD Quick Fill",
     "default_popup": "popup/index.html",
-    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://ttdevasthanams.ap.gov.in/*",
     "https://tirupatibalaji.ap.gov.in/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://ttdevasthanams.ap.gov.in/*", "https://tirupatibalaji.ap.gov.in/*"],
-      "js": ["content/fill.js"],
-      "css": ["content/fill.css"],
+      "matches": [
+        "https://ttdevasthanams.ap.gov.in/*",
+        "https://tirupatibalaji.ap.gov.in/*"
+      ],
+      "js": [
+        "content/fill.js"
+      ],
+      "css": [
+        "content/fill.css"
+      ],
       "run_at": "document_idle"
     }
   ],
-  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "{696c3052-cbf4-49d6-955f-dbf7217c5843}",
       "strict_min_version": "140.0",
-      "data_collection_permissions": { "required": ["none"] }
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
-  }
+  },
+  "homepage_url": "https://github.com/patanjaliv/ttd-quick-fill"
 }

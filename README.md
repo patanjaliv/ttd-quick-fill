@@ -27,11 +27,12 @@ Malayalam UI.
 **Chrome / Edge / Brave:** `chrome://extensions` → Developer mode →
 "Load unpacked" → pick this folder.
 
-**Firefox:** `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on"
+**Firefox:** install from addons.mozilla.org once the listing is approved
+(https://addons.mozilla.org/firefox/addon/ttd-quick-fill/). For development:
+`about:debugging#/runtime/this-firefox` → "Load Temporary Add-on"
 → pick `manifest.json`. If the popup shows a **Grant access to TTD sites**
 banner, press it once (site access can also be toggled under about:addons →
-TTD Quick Fill → Permissions). For a permanent install, build the zip and sign it on
-addons.mozilla.org (unlisted self-distribution is fine).
+TTD Quick Fill → Permissions).
 
 Permissions: `storage` (your saved pilgrims) and access to the two TTD sites
 only. No background script, no debugger permission.
