@@ -4,3 +4,6 @@ dist/
 e2e/work/
 e2e/mock/react.js
 e2e/mock/react-dom.js
+web-ext-artifacts/
+.amo-upload-uuid
+.web-extension-id

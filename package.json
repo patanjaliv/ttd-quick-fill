@@ -7,8 +7,12 @@
   "scripts": {
     "test": "node --test tests/",
     "test:e2e": "node e2e/run.mjs",
-    "lint": "web-ext lint --source-dir . --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'package.json' 'package-lock.json' '*.md'",
-    "build": "web-ext build --source-dir . --artifacts-dir dist --overwrite-dest --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'package.json' 'package-lock.json' '*.md'"
+    "lint": "web-ext lint --source-dir . --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'amo/**' 'web-ext-artifacts/**' 'package.json' 'package-lock.json' '*.md' '.amo-upload-uuid' '.web-extension-id'",
+    "build": "web-ext build --source-dir . --artifacts-dir dist --overwrite-dest --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'amo/**' 'web-ext-artifacts/**' 'package.json' 'package-lock.json' '*.md' '.amo-upload-uuid' '.web-extension-id'",
+    "amo:submit": "web-ext sign --channel listed --amo-metadata amo/metadata.json --artifacts-dir dist --approval-timeout 0 --ignore-files 'dist/**' 'node_modules/**' 'tests/**' 'e2e/**' 'amo/**' 'web-ext-artifacts/**' 'package.json' 'package-lock.json' '*.md' '.amo-upload-uuid' '.web-extension-id'",
+    "amo:privacy": "node amo/privacy-policy.mjs"
   },
-  "devDependencies": { "web-ext": "^8.0.0" }
+  "devDependencies": {
+    "web-ext": "^10.0.0"
+  }
 }
