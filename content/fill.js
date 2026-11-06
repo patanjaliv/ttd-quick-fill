@@ -16,12 +16,15 @@
   const PILGRIM_PATHS = ["/pilgrim-details", "/spat/pilgrim-details"];
   const ROW = { name: "fname", age: "age", gender: "gender", idType: "photoIdType", idNumber: "idProofNumber" };
   const GENERAL = { email: "emailId", city: "city", state: "state", country: "country", pincode: "pincode" };
-  // Srivani Trust donation darshan: numbered fields per person, native <select>s.
+  // Srivani Trust donation darshan: numbered fields per person (fName1, age1, ... on the live
+  // site; the index is read from the page rather than assumed), native <select>s.
   const SRIVANI = (i) => ({ name: `fName${i}`, age: `age${i}`, gender: `gender${i}`, idType: `proofS${i}`, idNumber: `proofId${i}` });
+  const srivaniRows = () => [...document.querySelectorAll('input[name^="fName"]')]
+    .map((el) => el.name.match(/^fName(\d+)$/)?.[1]).filter(Boolean).sort((a, b) => a - b);
 
   function pageKind() {
     if (location.hostname === HOST_MAIN && PILGRIM_PATHS.includes(location.pathname)) return "pilgrim-details";
-    if (document.querySelector('input[name="fName0"]')) return "srivani";
+    if (srivaniRows().length) return "srivani";
     return null;
   }
 
@@ -149,8 +152,11 @@
   }
 
   async function fillSrivani(pilgrims, report) {
+    const rows = srivaniRows();
     for (let i = 0; i < pilgrims.length; i++) {
-      const f = SRIVANI(i), p = pilgrims[i], who = p.name;
+      const p = pilgrims[i], who = p.name;
+      if (!rows[i]) { report.warnings.push(`${who}: no row ${i + 1} on this page (choose the number of persons first).`); continue; }
+      const f = SRIVANI(rows[i]);
       const nameEl = byName(f.name)[0];
       if (!nameEl) { report.warnings.push(`${who}: no row ${i + 1} on this page.`); continue; }
       let ok = await fillText(nameEl, p.name, `${who} · name`, report);

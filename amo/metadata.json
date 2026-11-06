@@ -19,7 +19,7 @@
   "version": {
     "license": "MIT",
     "release_notes": {
-      "en-US": "Adds optional passphrase protection: saved pilgrim and contact details can be stored encrypted (AES-256-GCM, PBKDF2-SHA256 key derivation) and are unlocked once per browser session. First public release otherwise: fills the Special Entry Darshan, Sri PAT and Srivani pilgrim-details forms on ttdevasthanams.ap.gov.in from details saved in the popup."
+      "en-US": "Fixes Srivani form detection on tirupatibalaji.ap.gov.in (rows are numbered from 1 on the live site); verified on the live form. Also includes 0.2.0's optional passphrase protection: saved pilgrim and contact details can be stored encrypted (AES-256-GCM, PBKDF2-SHA256 key derivation) and are unlocked once per browser session."
     },
     "approval_notes": "Unofficial helper for the TTD (Tirumala) darshan booking site. The booking site requires a pilgrim login, so for review without an account: the repository ships a mock of the pilgrim-details form (e2e/mock/pilgrim-details.html, a React controlled form using TTD's real field names) and an end-to-end test (npm run test:e2e) that loads the extension in Firefox and fills it. All source is unminified and human readable; no build step transforms it. The extension makes no network requests of its own, and only reads/writes extension storage plus the DOM of the two TTD hosts in host_permissions. Version 0.2.0 adds shared/vault.js: optional AES-GCM encryption of storage.local data with a user passphrase (WebCrypto only, no external code); the derived key is cached in storage.session; background.js (event page) answers the content script's READ message with the decrypted details so the content script never handles the key."
   },

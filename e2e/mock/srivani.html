@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Mock Srivani form</title>
+<style>body{font:14px system-ui;margin:20px} .row{display:flex;gap:8px;margin:6px 0} input,select{padding:4px}</style>
+</head><body>
+<!-- Plain-DOM copy of the live Srivani form's shape (tirupatibalaji.ap.gov.in): rows numbered
+     from 1, native selects, the ID-type list is populated only after an age is entered. -->
+<label>No. of persons <select id="count"><option>1</option><option selected>2</option></select></label>
+<div id="rows"></div>
+<button type="button">Reset</button> <button type="button">Continue</button>
+<pre id="state"></pre>
+<script>
+function row(i) {
+  const d = document.createElement('div'); d.className = 'row';
+  d.innerHTML = `<input name="fName${i}" placeholder="Name"> <input name="age${i}" type="number" placeholder="Age">
+    <select name="gender${i}"><option>Male</option><option>Female</option><option>Transgender</option></select>
+    <select name="proofS${i}"><option value="">Select</option></select> <input name="proofId${i}" placeholder="ID number">`;
+  d.querySelector(`[name=age${i}]`).addEventListener('input', (e) => {
+    const s = d.querySelector(`[name=proofS${i}]`);
+    if (e.target.value && s.options.length === 1) s.innerHTML += '<option value="aadhar">Aadhaar Card</option><option value="passport">Passport</option>';
+  });
+  return d;
+}
+function render() {
+  const n = Number(document.getElementById('count').value), rows = document.getElementById('rows');
+  rows.replaceChildren(); for (let i = 1; i <= n; i++) rows.append(row(i));
+}
+document.getElementById('count').addEventListener('change', render); render();
+document.addEventListener('input', dump); document.addEventListener('change', dump);
+function dump() { document.getElementById('state').textContent = JSON.stringify(Object.fromEntries([...document.querySelectorAll('input,select')].filter(e => e.name).map(e => [e.name, e.value]))); }
+dump();
+</script></body></html>
