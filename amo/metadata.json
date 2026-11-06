@@ -1,5 +1,4 @@
 {
-  "slug": "ttd-quick-fill",
   "default_locale": "en-US",
   "name": {
     "en-US": "TTD Quick Fill"
@@ -20,7 +19,7 @@
   "version": {
     "license": "MIT",
     "release_notes": {
-      "en-US": "First release. Fills the Special Entry Darshan, Sri PAT and Srivani pilgrim-details forms on ttdevasthanams.ap.gov.in from details saved in the popup."
+      "en-US": "First public release. Fills the Special Entry Darshan, Sri PAT and Srivani pilgrim-details forms on ttdevasthanams.ap.gov.in from details saved in the popup."
     },
     "approval_notes": "Unofficial helper for the TTD (Tirumala) darshan booking site. The booking site requires a pilgrim login, so for review without an account: the repository ships a mock of the pilgrim-details form (e2e/mock/pilgrim-details.html, a React controlled form using TTD's real field names) and an end-to-end test (npm run test:e2e) that loads the extension in Firefox and fills it. All source is unminified and human readable; no build step transforms it. The extension makes no network requests of its own, has no background script, and only reads/writes storage.local plus the DOM of the two TTD hosts in host_permissions."
   },
