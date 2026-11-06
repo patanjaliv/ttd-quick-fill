@@ -1,0 +1,15 @@
+{
+  "slug": "ttd-quick-fill",
+  "default_locale": "en-US",
+  "name": { "en-US": "TTD Quick Fill" },
+  "summary": { "en-US": "Save your family's pilgrim details once and fill the TTD (Tirumala) darshan booking forms in one click. Unofficial, free and open source. Nothing leaves your browser." },
+  "description": { "en-US": "**Unofficial.** Not affiliated with, endorsed by or sponsored by Tirumala Tirupati Devasthanams (TTD).\n\nTTD Quick Fill keeps your pilgrims (name, age, gender, Aadhaar or passport number) and optional contact details in your browser's extension storage and types them into the TTD online booking forms for you.\n\n**What it does**\n\n- Fills the Special Entry Darshan and Sri PAT pilgrim-details form (including the General Details block) and the Srivani form on ttdevasthanams.ap.gov.in, from the popup or from a floating button on the page.\n- Reports exactly which fields it filled and which you must enter by hand.\n- Only fills rows that are completely empty; it never overwrites what you typed.\n\n**What it never does**\n\n- Never presses Continue, Pay Now or Submit.\n- Never solves CAPTCHAs and never touches payment.\n- Has no server, makes no network requests, and collects no analytics or telemetry. Your data stays on your device and is deleted when you uninstall.\n\n**Permissions:** storage (your saved pilgrims) and access to the two TTD booking sites only. No background script.\n\nFree and open source under the MIT licence. Source code, issues and contributions: see the homepage link." },
+  "categories": { "firefox": ["other"] },
+  "is_experimental": false,
+  "requires_payment": false,
+  "version": {
+    "license": "MIT",
+    "release_notes": { "en-US": "First release. Fills the Special Entry Darshan, Sri PAT and Srivani pilgrim-details forms on ttdevasthanams.ap.gov.in from details saved in the popup." },
+    "approval_notes": "Unofficial helper for the TTD (Tirumala) darshan booking site. The booking site requires a pilgrim login, so for review without an account: the repository ships a mock of the pilgrim-details form (e2e/mock/pilgrim-details.html, a React controlled form using TTD's real field names) and an end-to-end test (npm run test:e2e) that loads the extension in Firefox and fills it. All source is unminified and human readable; no build step transforms it. The extension makes no network requests of its own, has no background script, and only reads/writes storage.local plus the DOM of the two TTD hosts in host_permissions."
+  }
+}
