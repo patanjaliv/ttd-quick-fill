@@ -60,6 +60,10 @@ app path). It drives Firefox over Marionette, loads the extension temporarily,
 serves `e2e/mock/pilgrim-details.html` (a React controlled form with the TTD
 field names) at the real hostname through a local HTTP proxy, fills it from the
 on-page button and from the popup message path, and checks React's state.
+`node e2e/live.mjs` opens a visible Firefox with the extension loaded on the
+real site (no proxy, no mock), you sign in and open a form yourself, and it
+logs the form's field names, enabled state and masked values so a mismatch
+with the selectors in `content/fill.js` can be spotted before pressing Fill.
 `HEADED=1 KEEP_OPEN=1 npm run test:e2e` runs it in a visible, slowed-down
 Firefox window and leaves that window open with the extension loaded, so you
 can try the popup and the on-page button by hand (and sign in to the real site
@@ -88,10 +92,11 @@ the constants at the top of `content/fill.js`.
 Written from scratch and MIT-licensed. The author examined an existing
 closed-source Chrome extension to learn the TTD form's field names, which are
 facts about the TTD website; no code from it is reused and the design differs
-(no debugger API, no synthetic keyboard driver). Status: v0.2.0 passes the end-to-end
-test against a mock of the form on Firefox 159 but has not yet been exercised
-against the live TTD site. Please open an issue with the page URL
-and the field that stayed empty if a fill fails.
+(no debugger API, no synthetic keyboard driver). Status: the Srivani form on
+tirupatibalaji.ap.gov.in was filled correctly on the live site on 2026-11-06
+(Firefox 159); the Special Entry Darshan / Sri PAT pilgrim-details form has so
+far only been exercised against the mock in `e2e/`. Please open an issue with
+the page URL and the field that stayed empty if a fill fails.
 
 ## Security
 
