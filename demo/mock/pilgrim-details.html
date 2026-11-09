@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Pilgrim Details</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="top">Special Entry Darshan — Pilgrim Details <small>Signed in</small></div>
+<div class="steps"><span>Select slot</span><b>Pilgrim details</b><span>Payment</span><span>Ticket</span></div>
+<div id="root"></div>
+<pre id="state"></pre>
+<script src="react.js"></script><script src="react-dom.js"></script>
+<script>
+// Same shape as the e2e mock (field names, combo-box lists, error icon) with a presentable layout.
+const { useState, createElement: h } = React;
+const GENDERS = ['Female','Male','Transgender'], IDS = ['Aadhaar Card','Passport'];
+const PH = { fname: 'Full name', age: 'Age', gender: 'Select', photoIdType: 'Select', idProofNumber: 'ID number', emailId: 'Email', city: 'City', state: 'State', country: 'Country', pincode: 'PIN code' };
+function Combo({name, options, value, onChange, disabled}) {
+  const [open, setOpen] = useState(false);
+  return h('div', {className:'combo cell'},
+    h('div', null, h('input', {name, value, disabled, placeholder: PH[name], readOnly: true, onClick:()=>!disabled&&setOpen(o=>!o)})),
+    open && h('ul', null, options.map(o => h('li', {key:o, role:'option', onClick:()=>{onChange(o); setOpen(false);}}, o))));
+}
+function Text({name, value, onChange, disabled, error}) {
+  return h('div', {className:'cell'}, h('div', null, h('input', {name, value, disabled, placeholder: PH[name], onChange:e=>onChange(e.target.value)}),
+    error && h('img', {className:'err', src:'/erroricon.svg', alt:'error'})));
+}
+const blankRow = () => ({fname:'', age:'', gender:'', photoIdType:'', idProofNumber:''});
+function App() {
+  const [rows, setRows] = useState([blankRow(), blankRow(), blankRow(), blankRow()]);
+  const [general, setGeneral] = useState({emailId:'', city:'', state:'', country:'', pincode:''});
+  const upd = (i, k) => v => setRows(r => r.map((row, j) => j===i ? {...row, [k]:v} : row));
+  document.getElementById('state').textContent = JSON.stringify({rows, general}, null, 1);
+  return h('div', null,
+    h('div', {className:'card'}, h('h3', null, 'Pilgrim Details (4 persons)'),
+      h('div', {className:'head'}, ['Name','Age','Gender','Photo ID type','ID number'].map(t => h('span', {key:t}, t))),
+      rows.map((row, i) => h('div', {className:'row', key:i},
+        h(Text, {name:'fname', value:row.fname, onChange:upd(i,'fname'), error: /\d/.test(row.fname)}),
+        h(Text, {name:'age', value:row.age, onChange:upd(i,'age'), error: row.age!=='' && !/^\d{1,3}$/.test(row.age)}),
+        h(Combo, {name:'gender', options:GENDERS, value:row.gender, onChange:upd(i,'gender')}),
+        h(Combo, {name:'photoIdType', options:IDS, value:row.photoIdType, onChange:upd(i,'photoIdType'), disabled: row.age===''}),
+        h(Text, {name:'idProofNumber', value:row.idProofNumber, onChange:upd(i,'idProofNumber'), disabled: row.photoIdType===''})))),
+    h('div', {className:'card'}, h('h3', null, 'General Details'),
+      h('div', {className:'head g'}, ['Email','City','State','Country','PIN code'].map(t => h('span', {key:t}, t))),
+      h('div', {className:'row g'}, Object.keys(general).map(k => h(Text, {key:k, name:k, value:general[k], onChange:v=>setGeneral(g=>({...g,[k]:v}))}))),
+      h('div', {className:'actions'}, h('button', {type:'button'}, 'Back'), h('button', {type:'button', className:'pri'}, 'Continue'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script></body></html>
