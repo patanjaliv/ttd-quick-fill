@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Srivani Trust</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="top">Srivani Trust — Donor &amp; Pilgrim Details <small>Signed in</small></div>
+<div class="steps"><span>Donation</span><b>Pilgrim details</b><span>Payment</span><span>Receipt</span></div>
+<div class="card">
+<label class="inline">No. of persons <select id="count"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
+<div class="head"><span>Name</span><span>Age</span><span>Gender</span><span>Proof type</span><span>Proof number</span></div>
+<div id="rows"></div>
+<div class="actions"><button type="button">Reset</button><button type="button" class="pri">Continue</button></div>
+</div>
+<pre id="state"></pre>
+<script>
+// Same shape as the live Srivani form: rows numbered from 1, native selects, proof list appears after age.
+function row(i) {
+  const d = document.createElement('div'); d.className = 'row';
+  d.innerHTML = `<input name="fName${i}" placeholder="Full name"><input name="age${i}" type="number" placeholder="Age">
+    <select name="gender${i}"><option>Male</option><option>Female</option><option>Transgender</option></select>
+    <select name="proofS${i}"><option value="">Select</option></select><input name="proofId${i}" placeholder="Proof number">`;
+  d.querySelector(`[name=age${i}]`).addEventListener('input', (e) => {
+    const s = d.querySelector(`[name=proofS${i}]`);
+    if (e.target.value && s.options.length === 1) s.innerHTML += '<option value="aadhar">Aadhaar Card</option><option value="passport">Passport</option>';
+  });
+  return d;
+}
+function render() { const n = Number(count.value), rows = document.getElementById('rows'); rows.replaceChildren(); for (let i = 1; i <= n; i++) rows.append(row(i)); }
+document.getElementById('count').addEventListener('change', render); render();
+</script></body></html>

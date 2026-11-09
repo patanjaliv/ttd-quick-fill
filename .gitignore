@@ -8,3 +8,5 @@ web-ext-artifacts/
 .amo-upload-uuid
 .web-extension-id
 amo/previews/out/
+demo/work/
+demo/out/

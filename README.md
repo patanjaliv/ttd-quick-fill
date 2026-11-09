@@ -87,6 +87,14 @@ through `document.execCommand('insertText')` so React sees ordinary input
 events, with a prototype-setter fallback. If TTD changes a field name, update
 the constants at the top of `content/fill.js`.
 
+## Demo video
+
+`node demo/record.mjs` produces `demo/out/ttd-quick-fill-demo.mp4` (1280x720, about two
+minutes, narrated): the real extension in a headless Firefox, driven through the popup and the
+look-alike booking forms in `demo/mock` with sample pilgrims. Frames are captured over
+Marionette and stitched with ffmpeg; the narration comes from macOS `say` (set `VOICE=` to
+change the voice). Needs Firefox, ffmpeg and macOS.
+
 ## Provenance
 
 Written from scratch and MIT-licensed. The author examined an existing
