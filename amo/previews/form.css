@@ -1,0 +1,18 @@
+/* A neutral stand-in for a government booking form (no official branding). */
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f6f8; color: #233443; font: 14px/1.4 "Open Sans", "Segoe UI", system-ui, sans-serif; }
+.top { background: #1f3b57; color: #fff; padding: 12px 24px; font-weight: 600; display: flex; justify-content: space-between; }
+.top small { font-weight: 400; opacity: .8; }
+.steps { display: flex; gap: 28px; padding: 12px 24px; background: #fff; border-bottom: 1px solid #e1e6eb; font-size: 13px; color: #8a97a3; }
+.steps b { color: #1f3b57; border-bottom: 2px solid #1f3b57; padding-bottom: 6px; }
+.card { background: #fff; margin: 20px 24px; border: 1px solid #e1e6eb; border-radius: 8px; padding: 18px 22px 22px; }
+h2 { font-size: 15px; margin: 0 0 14px; color: #1f3b57; }
+.grid { display: grid; grid-template-columns: 1.4fr .7fr .9fr 1.1fr 1.3fr; gap: 10px 14px; align-items: end; }
+.grid.s { grid-template-columns: 1.6fr .7fr 1fr 1.2fr 1.4fr; }
+label { display: block; font-size: 12px; color: #5c6b78; margin-bottom: 4px; }
+.f { height: 38px; border: 1px solid #c9d2da; border-radius: 4px; padding: 0 10px; display: flex; align-items: center; background: #fff; }
+.f.sel::after { content: "▾"; margin-left: auto; color: #8a97a3; }
+.f.ph { color: #a4afb9; }
+.actions { margin-top: 18px; display: flex; gap: 10px; }
+.btn { padding: 9px 20px; border-radius: 4px; border: 1px solid #c9d2da; background: #fff; font: inherit; font-weight: 600; color: #1f3b57; }
+.btn.pri { background: #1f3b57; color: #fff; border-color: #1f3b57; }
