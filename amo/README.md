@@ -15,3 +15,9 @@ Then:
 
 `amo/metadata.json` is sent with every version (listing text, category,
 licence, release notes, reviewer notes). Edit it before a release.
+
+## Previews
+
+`node amo/previews.mjs` renders `amo/previews/*.html` to 1280x800 PNGs with headless Firefox;
+`--upload` pushes them to the listing with captions. AMO throttles listing writes hard
+(minutes to an hour), so space out repeated uploads.

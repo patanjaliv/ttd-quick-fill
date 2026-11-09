@@ -1,0 +1,20 @@
+/* 1280x800 preview frames for the AMO listing. Rendered by amo/previews.mjs with headless Firefox. */
+:root { --maroon: #a10007; --maroon-dark: #7d0005; --cream: #fefbd5; --gold: #f2c65d; --gold-dark: #d9a93a; --sand: #f8dcaa; --bg: #fdf1f4; --text: #233443; --muted: #707070; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; }
+body { background: linear-gradient(135deg, #fff7f8 0%, var(--bg) 55%, #fbe9c9 100%); color: var(--text); font: 17px/1.5 "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif; position: relative; }
+body::before { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 400px at 85% 15%, rgba(242,198,93,.35), transparent 70%); pointer-events: none; }
+.copy { position: absolute; left: 64px; top: 96px; width: 440px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--maroon); background: var(--cream); border: 1px solid var(--gold); border-radius: 999px; padding: 6px 12px; }
+.eyebrow::before { content: "ॐ"; color: var(--gold-dark); font-size: 15px; }
+h1 { font: 600 44px/1.12 "Hoefler Text", Georgia, "Times New Roman", serif; color: var(--maroon-dark); margin: 22px 0 16px; letter-spacing: -.01em; }
+p { margin: 0 0 12px; color: #3b4a58; }
+ul { margin: 18px 0 0; padding: 0; list-style: none; }
+li { position: relative; padding-left: 30px; margin: 10px 0; }
+li::before { content: "✓"; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--maroon); color: #fff; font-size: 13px; font-weight: 700; line-height: 22px; text-align: center; }
+.foot { position: absolute; left: 64px; bottom: 44px; font-size: 13px; color: var(--muted); }
+.shot { position: absolute; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 30px 70px rgba(125, 0, 5, .22), 0 2px 0 var(--gold); border: 1px solid var(--sand); }
+.shot iframe { border: 0; display: block; transform-origin: top left; }
+.chrome { height: 34px; background: #f3e4e6; border-bottom: 1px solid var(--sand); display: flex; align-items: center; gap: 7px; padding: 0 12px; }
+.chrome i { width: 11px; height: 11px; border-radius: 50%; background: #e3b7bb; display: block; }
+.chrome span { margin-left: 10px; font-size: 12px; color: var(--muted); }
