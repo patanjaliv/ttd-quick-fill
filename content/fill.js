@@ -25,6 +25,7 @@
   function pageKind() {
     if (location.hostname === HOST_MAIN && PILGRIM_PATHS.includes(location.pathname)) return "pilgrim-details";
     if (srivaniRows().length) return "srivani";
+    if (globalThis.__ttdqfGeneric?.detect()) return "generic";   // 0.3.0: label-matched forms (content/generic.js)
     return null;
   }
 
@@ -188,6 +189,7 @@
     setStatus("Filling… do not type until it finishes.", "busy");
     try {
       if (kind === "pilgrim-details") await fillPilgrimDetails(pilgrims, contact, report);
+      else if (kind === "generic") await globalThis.__ttdqfGeneric.fill(pilgrims, report, { fillText, chooseCombo, setSelect, waitFor, sleep, enabled });
       else await fillSrivani(pilgrims, report);
     } catch (err) {
       report.ok = false;

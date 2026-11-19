@@ -21,6 +21,13 @@ family's details once and fills them into the Tirumala Tirupati Devasthanams
 - Never presses Continue, Pay Now or Submit, never solves CAPTCHAs, never
   touches payment.
 
+**0.3.0 — any other TTD pilgrim form (generic layer).** When the page is neither the SED/SPAT
+pilgrim-details page nor the Srivani form, `content/generic.js` finds pilgrim rows by the labels a
+person reads (Name, Age, Gender, ID type, ID number) and fills them the same way, then warns you to
+check every value. This is how Arjitha seva, Angapradakshinam, senior-citizen darshan and similar
+forms get filled without a dedicated adapter; a tested adapter is added once a form has been seen.
+Mock: `demo/mock/generic-seva.html`.
+
 Roadmap (help welcome): paid-seva and group-seva forms, e-DIP (lucky draw)
 form and date table, Telugu/Hindi/Tamil/Kannada/Malayalam UI.
 

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mock — Arjitha Seva pilgrim details (unknown form)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Sri Venkateswara Suprabhatam — Pilgrim Details</h1>
+<p>A look-alike of a seva form the extension has no adapter for: fields are found by their labels.</p>
+<form id="seva">
+  <fieldset class="pilgrim">
+    <legend>Pilgrim 1</legend>
+    <label>Pilgrim Name <input type="text" name="p1_nm"></label>
+    <label>Age <input type="number" name="p1_ag"></label>
+    <label>Gender
+      <select name="p1_gn"><option value="">Select</option><option>Male</option><option>Female</option></select>
+    </label>
+    <label>Photo ID Type
+      <select name="p1_idt"><option value="">Select</option><option>Aadhar Card</option><option>Passport</option><option>Voter ID</option></select>
+    </label>
+    <label>ID Proof Number <input type="text" name="p1_idn"></label>
+  </fieldset>
+  <fieldset class="pilgrim">
+    <legend>Pilgrim 2</legend>
+    <label>Pilgrim Name <input type="text" name="p2_nm"></label>
+    <label>Age <input type="number" name="p2_ag"></label>
+    <fieldset><legend>Gender</legend>
+      <label><input type="radio" name="p2_gn" value="M"> Male</label>
+      <label><input type="radio" name="p2_gn" value="F"> Female</label>
+    </fieldset>
+    <label>Photo ID Type
+      <select name="p2_idt"><option value="">Select</option><option>Aadhar Card</option><option>Passport</option></select>
+    </label>
+    <label>ID Proof Number <input type="text" name="p2_idn"></label>
+  </fieldset>
+  <label>Mobile Number <input type="tel" name="mobile"></label>
+  <label>Email <input type="email" name="email"></label>
+  <button type="button">Continue</button>
+</form>
+</body>
+</html>
