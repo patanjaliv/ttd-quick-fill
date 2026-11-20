@@ -83,7 +83,7 @@
 
   /** True when this page has at least one pilgrim row the generic layer can fill. */
   function detect() {
-    if (/login|otp|signin|sign-in/i.test(location.pathname)) return false;
+    if (/login|otp|signin|sign-in/i.test(location.pathname + location.hash)) return false;   // 0.3.1: "#/login" style routes too
     return rows().length > 0;
   }
 

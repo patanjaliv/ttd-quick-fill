@@ -4,7 +4,7 @@ const ext = globalThis.browser ?? globalThis.chrome;
 const $ = (sel) => document.querySelector(sel);
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `p-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
-const TTD_ORIGINS = ["https://ttdevasthanams.ap.gov.in/*", "https://tirupatibalaji.ap.gov.in/*"];
+const TTD_ORIGINS = ["https://ttdevasthanams.ap.gov.in/*", "https://tirupatibalaji.ap.gov.in/*", "https://*.ttdevasthanams.ap.gov.in/*", "https://*.tirupatibalaji.ap.gov.in/*"];   // 0.3.1: sub-portals too
 // Saved details go through the vault, which is a plain pass-through until a passphrase is set.
 const vault = globalThis.TTDQF.vault;
 const load = async () => {
@@ -116,7 +116,7 @@ $("#fill").addEventListener("click", async () => {
   setStatus("Filling…");
   try {
     const tab = await activeTab();
-    if (!tab?.id || !/^https:\/\/(ttdevasthanams|tirupatibalaji)\.ap\.gov\.in\//.test(tab.url || "")) {
+    if (!tab?.id || !/^https:\/\/([a-z0-9-]+\.)?(ttdevasthanams|tirupatibalaji)\.ap\.gov\.in\//.test(tab.url || "")) {
       setStatus("Open a TTD booking page (ttdevasthanams.ap.gov.in) in this tab first.");
       return;
     }

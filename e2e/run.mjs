@@ -173,6 +173,13 @@ try {
   await m.click(await m.find("#ttdqf-fab")); await sleep(3000);
   out.srivaniStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
   out.srivaniState = await m.exec(`return document.getElementById('state').textContent`);
+
+  // Fifth (0.3.1): the Arjitha seva slot-booking page on the main site, same form under a different path + query.
+  await m.navigate("http://ttdevasthanams.ap.gov.in/arjitha-seva/slot-booking?section=pilgrim-details&flowIdentifier=arjitha-seva&flow=arjitha-seva"); await sleep(800);
+  out.arjithaFab = !!(await m.exec(`return document.getElementById('ttdqf-fab')`));
+  await m.click(await m.find("#ttdqf-fab")); await sleep(4000);
+  out.arjithaStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
+  out.arjithaState = await m.exec(`return document.getElementById('state').textContent`);
 } catch (e) {
   out.error = String(e.stack || e);
 } finally {
@@ -191,7 +198,8 @@ const vaultOk = out.vaultStorage?.keys?.includes("vault") && !out.vaultStorage.k
 const srivaniOk = (() => { try { const s = JSON.parse(out.srivaniState); return out.srivaniFab && /Filled 2 of 2/.test(out.srivaniStatus || "")
   && s.fName1 === "Rama Krishna" && s.age1 === "34" && s.gender1 === "Male" && s.proofS1 === "aadhar" && s.proofId1 === "999912345676"
   && s.fName2 === "Sita Devi" && s.gender2 === "Female" && s.proofId2 === "999912345684"; } catch { return false; } })();
-out.pass = !out.error && !!srivaniOk && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState) && !!vaultOk;
+const arjithaOk = out.arjithaFab && /Filled 2 of 2/.test(out.arjithaStatus || "") && stateOk(out.arjithaState) && !/Unrecognised/.test(out.arjithaStatus || "");   // the proven adapter, not the generic layer
+out.pass = !out.error && !!arjithaOk && !!srivaniOk && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState) && !!vaultOk;
 console.log(JSON.stringify(out, null, 1));
 console.log(out.pass ? "E2E PASS" : "E2E FAIL");
 process.exit(out.pass ? 0 : 1);

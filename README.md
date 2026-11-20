@@ -31,6 +31,12 @@ Mock: `demo/mock/generic-seva.html`.
 Roadmap (help welcome): paid-seva and group-seva forms, e-DIP (lucky draw)
 form and date table, Telugu/Hindi/Tamil/Kannada/Malayalam UI.
 
+**0.3.1 — Arjitha seva.** The Arjitha seva slot-booking page on the main site
+(`/arjitha-seva/slot-booking?section=pilgrim-details`) is filled by the proven pilgrim-details adapter when it
+carries the same field names, and by the label-matched layer otherwise. The extension also loads on any
+sub-portal of the two TTD domains (`*.ttdevasthanams.ap.gov.in`, `*.tirupatibalaji.ap.gov.in`), so a seva that
+TTD moves to its own host is still covered.
+
 ## Install
 
 **Chrome / Edge / Brave:** `chrome://extensions` → Developer mode →

@@ -24,6 +24,7 @@
 
   function pageKind() {
     if (location.hostname === HOST_MAIN && PILGRIM_PATHS.includes(location.pathname)) return "pilgrim-details";
+    if (location.hostname === HOST_MAIN && /\/slot-booking$/.test(location.pathname) && byName(ROW.name).length) return "pilgrim-details";   // 0.3.1: Arjitha seva (/arjitha-seva/slot-booking?section=pilgrim-details) reuses the same form
     if (srivaniRows().length) return "srivani";
     if (globalThis.__ttdqfGeneric?.detect()) return "generic";   // 0.3.0: label-matched forms (content/generic.js)
     return null;
