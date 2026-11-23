@@ -86,6 +86,69 @@ form.addEventListener("submit", async (e) => {
   renderList();
 });
 
+// -------------------------------------------------------------- profiles --
+// 0.4.0: named groups of saved pilgrims (shared/profiles.js). Profiles hold ids only and live as plain storage.
+const profilesApi = globalThis.TTDQF.profiles;
+const profileForm = $("#profile-form");
+async function renderProfiles() {
+  const { profiles, active } = await profilesApi.list(ext);
+  const select = $("#profile-select");
+  select.replaceChildren(el("option", { value: "", textContent: "Ticked pilgrims" }),
+    ...profiles.map((p) => el("option", { value: p.id, textContent: `${p.name} (${p.pilgrimIds.length})` })));
+  select.value = profiles.some((p) => p.id === active) ? active : "";
+  $("#edit-profile").disabled = $("#delete-profile").disabled = !select.value;
+}
+$("#profile-select").addEventListener("change", async (e) => {
+  await profilesApi.setActive(ext, e.target.value);
+  $("#edit-profile").disabled = $("#delete-profile").disabled = !e.target.value;
+});
+async function openProfileForm(profile = null) {
+  const { pilgrims } = await load();
+  profileForm.reset();
+  $("#profile-errors").textContent = "";
+  $("#profile-form-title").textContent = profile ? "Edit profile" : "New profile";
+  profileForm.elements.id.value = profile?.id ?? "";
+  profileForm.elements.name.value = profile?.name ?? "";
+  const ul = $("#profile-pilgrims");
+  ul.replaceChildren(...pilgrims.map((p) => {
+    const tick = el("input", { type: "checkbox", value: p.id, checked: !!profile?.pilgrimIds.includes(p.id) });
+    return el("li", {}, tick, el("div", {}, el("div", { className: "who", textContent: p.name }), el("div", { className: "meta", textContent: `${p.age} · ${p.gender}` })));
+  }));
+  if (!pilgrims.length) ul.append(el("li", {}, el("div", { className: "muted", textContent: "Save a pilgrim first." })));
+  profileForm.hidden = false;
+  profileForm.elements.name.focus();
+}
+$("#add-profile").addEventListener("click", () => openProfileForm());
+$("#edit-profile").addEventListener("click", async () => {
+  const { profiles } = await profilesApi.list(ext);
+  const p = profiles.find((x) => x.id === $("#profile-select").value);
+  if (p) openProfileForm(p);
+});
+$("#delete-profile").addEventListener("click", async () => {
+  const { profiles, active } = await profilesApi.list(ext);
+  const p = profiles.find((x) => x.id === $("#profile-select").value);
+  if (!p || !confirm(`Delete profile "${p.name}"? The pilgrims themselves stay saved.`)) return;
+  await profilesApi.save(ext, profiles.filter((x) => x.id !== p.id));
+  if (active === p.id) await profilesApi.setActive(ext, "");
+  renderProfiles();
+});
+$("#cancel-profile").addEventListener("click", () => { profileForm.hidden = true; });
+profileForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = profileForm.elements.name.value.trim();
+  const pilgrimIds = [...profileForm.querySelectorAll('#profile-pilgrims input[type="checkbox"]:checked')].map((t) => t.value);
+  if (!name) { $("#profile-errors").textContent = "Give the profile a name."; return; }
+  if (!pilgrimIds.length) { $("#profile-errors").textContent = "Tick at least one pilgrim."; return; }
+  const { profiles } = await profilesApi.list(ext);
+  const id = profileForm.elements.id.value || uid();
+  const next = { id, name, pilgrimIds };
+  await profilesApi.save(ext, profiles.some((p) => p.id === id) ? profiles.map((p) => (p.id === id ? next : p)) : [...profiles, next]);
+  await profilesApi.setActive(ext, id);
+  profileForm.hidden = true;
+  renderProfiles();
+  setStatus(`Profile "${name}" saved and selected.`);
+});
+
 // --------------------------------------------------------------- contact --
 const contactForm = $("#contact-form");
 async function renderContact() {
@@ -121,12 +184,13 @@ $("#fill").addEventListener("click", async () => {
       return;
     }
     const { pilgrims, contact } = await load();
-    const selected = pilgrims.filter((p) => p.selected !== false);
-    if (!selected.length) { setStatus("Tick at least one pilgrim."); return; }
+    const { profiles, active } = await profilesApi.list(ext);                       // 0.4.0: the chosen profile, else the ticks
+    const { pilgrims: selected, profile } = profilesApi.choose(pilgrims, profiles, active);
+    if (!selected.length) { setStatus(profile ? `Profile "${profile.name}" has no saved pilgrims left.` : "Tick at least one pilgrim."); return; }
     const result = await ext.tabs.sendMessage(tab.id, { type: "FILL", pilgrims: selected, contact });
     if (!result) { setStatus("No reply from the page. Reload the TTD tab and try again."); return; }
     if (!result.ok) { setStatus(result.error || "Could not fill this page."); return; }
-    const lines = [`Filled ${result.filled.length} of ${selected.length} pilgrim(s).`, ...result.warnings];
+    const lines = [`Filled ${result.filled.length} of ${selected.length} pilgrim(s)${profile ? ` from "${profile.name}"` : ""}.`, ...result.warnings];
     if (!result.warnings.length) lines.push("Review the form and continue yourself.");
     setStatus(lines.join("\n"));
   } catch (err) {
@@ -235,6 +299,6 @@ async function init() {
   if (state.locked) { showLocked(); return; }
   $("#lock-screen").hidden = true;
   $("#main").hidden = false;
-  await Promise.all([renderPermissionBanner(), renderList(), renderContact(), renderSecurity()]);
+  await Promise.all([renderPermissionBanner(), renderList(), renderProfiles(), renderContact(), renderSecurity()]);
 }
 init();

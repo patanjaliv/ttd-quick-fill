@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Mock TTD pilgrim details (gated field component, Nov 2026)</title>
+<style>body{font:14px system-ui;margin:20px} .row{display:flex;gap:8px;margin:6px 0} input{padding:4px} .combo{position:relative} ul{position:absolute;margin:0;padding:0;list-style:none;background:#fff;border:1px solid #888;z-index:5} li{padding:4px 8px;cursor:pointer} img{width:12px;height:12px;background:red} .err{color:#b00}</style>
+</head><body>
+<div id="root"></div>
+<script>window.__errors=[];window.addEventListener("error",e=>{__errors.push(String(e.message||e));document.getElementById("state").textContent="ERR "+__errors.join("; ")});</script>
+<pre id="state"></pre>
+<script src="react.js"></script><script src="react-dom.js"></script>
+<script>
+// Mirrors the field component the real site switched to in Nov 2026 (chunk 2iomxob8ta1t9.js): every handler checks
+// nativeEvent.isTrusted. An untrusted onChange is reverted to the component's own value; the dropdown input is
+// readOnly and opens only on a trusted click; an option is taken only on a trusted click.
+const { useState, useEffect, createElement: h } = React;
+const GENDERS = [{id:1,title:'Female'},{id:2,title:'Male'},{id:3,title:'Transgender'}], IDS = [{id:1,title:'Aadhaar Card'},{id:2,title:'Passport'}];
+window.__trusted = [];
+function Field(p) {
+  const [T, setT] = useState(p.value ?? '');
+  const [open, setOpen] = useState(false);
+  useEffect(() => { setT(p.value ?? ''); }, [p.value]);
+  const revert = (el) => { if (!el) return; const t = T ?? ''; const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set; s ? s.call(el, t) : (el.value = t); el._valueTracker?.setValue(t); };
+  const pick = (item) => { setT(item.title); p.selectedItem?.(item); };
+  return h('div', {className: p.dropdown ? 'combo' : ''},
+    h('div', {style:{position:'relative'}},
+      h('input', {className:'floating-input', value: T, name: p.name, id: p.id, type: p.type || 'text', maxLength: p.maxLength, placeholder: p.label,
+        readOnly: !!p.dropdown, disabled: p.disabled || false,
+        onChange: (e) => { window.__trusted.push(`${p.name}:change:${e.nativeEvent?.isTrusted}`); e?.nativeEvent?.isTrusted ? p.onChange?.(e) : revert(e?.target); },
+        onClick: (e) => { window.__trusted.push(`${p.name}:click:${e.nativeEvent?.isTrusted}`); e.nativeEvent?.isTrusted && p.dropdown && setOpen(true); },
+        onBlur: (e) => { window.__trusted.push(`${p.name}:blur:${e.target.value}`); p.onBlur?.(e); } })),
+    p.dropdown && open && h('div', {className:'dropdown_scroll'}, h('ul', null, p.list.map(item =>
+      h('li', {key: item.id, onClick: (e) => { window.__trusted.push(`${p.name}:li:${e.nativeEvent?.isTrusted}`); e.nativeEvent?.isTrusted && (pick(item), setOpen(false)); }}, item.title)))),
+    p.errorText && h('div', {className:'err'}, h('img', {src:'/erroricon.svg', alt:''}), p.errorText));
+}
+const blank = () => ({fname:'', age:'', gender:'', photoIdType:'', idProofNumber:''});
+function App() {
+  const [rows, setRows] = useState([blank(), blank(), blank()]);
+  const [errs, setErrs] = useState([blank(), blank(), blank()]);
+  const [general, setGeneral] = useState({emailId:'', city:'', state:'', country:'', pincode:''});
+  const setRow = (i, k, v) => setRows(r => r.map((row, j) => j === i ? {...row, [k]: v} : row));
+  const setErr = (i, k, v) => setErrs(r => r.map((row, j) => j === i ? {...row, [k]: v} : row));
+  // the real page's handlers: tn / tg (name), td / tp (age), tc / ty (ID number), selectedItem (dropdowns)
+  const tn = (e) => { const {name, value, id} = e.target; if (!/^[a-zA-Z ]*$/.test(value)) return e.preventDefault(); setRow(+id, name, value); };
+  const tg = (e) => { const {name, value, id} = e.target; setErr(+id, name, value ? (/^[a-zA-Z][a-zA-Z ]{1,80}$/.test(value) ? '' : 'Please enter a valid Name') : 'Name cannot be empty'); };
+  const td = (e) => { const {name, value, id} = e.target; setRow(+id, name, value); };
+  const tp = (e) => { const {name, value, id} = e.target; setErr(+id, name, value ? ((value < 12 || value > 120) ? 'The valid age allowed to book is 12 to 120 years' : '') : 'Please enter the age'); };
+  const tc = (e) => { const {name, value, id} = e.target; setRow(+id, name, value.toUpperCase()); };
+  const ty = (e) => { const {name, value, id} = e.target; setErr(+id, name, value ? '' : 'Photo ID Card Number cannot be empty'); };
+  document.getElementById('state').textContent = JSON.stringify({rows, general, errs}, null, 1);
+  return h('div', null,
+    rows.map((row, i) => h('div', {className:'row', key:i},
+      h(Field, {name:'fname', id:i, label:'Name', value:row.fname, onChange:tn, onBlur:tg, maxLength:'80', errorText:errs[i].fname}),
+      h(Field, {name:'age', id:i, label:'Age', type:'number', value:row.age, onChange:td, onBlur:tp, maxLength:'3', errorText:errs[i].age}),
+      h(Field, {name:'gender', id:i, label:'Gender', dropdown:true, list:GENDERS, value:row.gender, selectedItem:(it)=>{ setRow(i,'gender',it.title); setErr(i,'gender',''); }, errorText:errs[i].gender}),
+      h(Field, {name:'photoIdType', id:i, label:'Photo ID Proof', dropdown:true, list:IDS, value:row.photoIdType, disabled: row.age === '', selectedItem:(it)=>{ setRow(i,'photoIdType',it.title); setErr(i,'photoIdType',''); }, errorText:errs[i].photoIdType}),
+      h(Field, {name:'idProofNumber', id:i, label:'Photo Id Number', value:row.idProofNumber, onChange:tc, onBlur:ty, disabled: row.photoIdType === '', errorText:errs[i].idProofNumber}))),
+    h('h3', null, 'General Details'),
+    h('div', {className:'row'}, Object.keys(general).map(k => h(Field, {key:k, name:k, id:0, label:k, value:general[k], onChange:(e)=>setGeneral(g=>({...g,[k]:e.target.value}))}))),
+    h('button', {type:'button', onClick:()=>alert('continue')}, 'Continue'),
+    h('pre', {id:'events'}, window.__trusted.join('\n')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script></body></html>

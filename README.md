@@ -37,6 +37,20 @@ carries the same field names, and by the label-matched layer otherwise. The exte
 sub-portal of the two TTD domains (`*.ttdevasthanams.ap.gov.in`, `*.tirupatibalaji.ap.gov.in`), so a seva that
 TTD moves to its own host is still covered.
 
+**0.3.2 — the new TTD field component (Nov 2026).** TTD rebuilt the pilgrim-details fields (first seen on the
+Tiruchanur Special Darshan page, `/spat/pilgrim-details`): they now ignore every event a script makes, revert a
+field after an untrusted change, and open or pick a dropdown only on a trusted click. The extension therefore
+types through the browser's own editing command, hands the value to the page's React handler when that is not
+enough (`content/react-bridge.js`), sends no synthetic events to such fields, waits for the value to settle and
+only then blurs so the page's own validation sees the final value. Forms that never needed this behave exactly
+as before. The mock `e2e/mock/spat-pilgrim-details.html` reproduces the new component for the test suite.
+
+**0.4.0 — profiles.** A profile is a named group of your saved pilgrims (Family, Parents, Office trip…) in the
+order they should be filled. Create one in the popup under Profiles; on a pilgrim-details page a small picker
+appears beside the Fill button, so you choose the profile there and the form is filled with exactly that group.
+"Ticked pilgrims" keeps the old behaviour. Profiles store only a name and pilgrim ids (`shared/profiles.js`);
+the pilgrims' details stay where they were, encrypted when a passphrase is set.
+
 ## Install
 
 **Chrome / Edge / Brave:** `chrome://extensions` → Developer mode →

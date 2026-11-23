@@ -61,11 +61,24 @@
 
   // Sets a value so that React (and plain pages) notice it: prefer the browser's own
   // editing command, fall back to the prototype setter plus an input event.
-  function setValue(el, value) {
+  async function setValue(el, value) {
     el.focus({ preventScroll: true });
     try {
       el.setSelectionRange?.(0, el.value.length);
     } catch { /* type=number and friends refuse selection ranges */ }
+    // 0.3.2: the site's new field component ignores untrusted events (an untrusted change reverts the field, and the
+    // value it shows settles only after React has re-rendered). On a React-managed field: type through the browser's
+    // editing command (a trusted change), fall back to the page's own React onChange (content/react-bridge.js), never
+    // send a synthetic input/change event, wait for the value to settle, then blur (the page validates on blur).
+    if (globalThis.__ttdqfReact?.has(el)) {
+      try { document.execCommand("insertText", false, value); } catch { /* not supported here */ }
+      const settled = async () => (await waitFor(() => el.value === value, 400)) || (globalThis.__ttdqfReact.setText(el, value), await waitFor(() => el.value === value, 400));
+      await settled();
+      el.blur();
+      if (!(await settled())) return;
+      el.focus({ preventScroll: true }); el.blur();   // the blur validator runs again on the settled value
+      return;
+    }
     let done = false;
     try {
       done = document.execCommand("insertText", false, value) && el.value === value;
@@ -75,6 +88,10 @@
       Object.getOwnPropertyDescriptor(proto, "value").set.call(el, value);
       el.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true, inputType: "insertText", data: value }));
     }
+    // 0.3.2: the site's new field component ignores untrusted events: it reverts the field to its last known value on
+    // an untrusted change, and it learns the new value only after React has flushed. So on a React-managed field: hand
+    // the value to the page's own onChange (content/react-bridge.js), send no synthetic change event, give React a
+    // moment, and only then blur (the page validates on blur). Other fields keep the old sequence unchanged.
     el.dispatchEvent(new Event("change", { bubbles: true }));
     el.blur();
   }
@@ -93,13 +110,17 @@
   async function chooseCombo(input, wanted) {
     if (input.value.trim() === wanted) return true;
     click(input);
-    const option = await waitFor(() => {
+    const findOption = () => {
       const scope = input.closest("form") || document;
       return [...scope.querySelectorAll('li[role="option"], li')].filter(visible).find((li) => li.textContent.trim() === wanted);
-    }, 2500);
+    };
+    let option = await waitFor(findOption, 300);
+    // 0.3.2: the new field component opens only on a trusted click; ask its React onClick instead (content/react-bridge.js)
+    if (!option && globalThis.__ttdqfReact?.click(input)) option = await waitFor(findOption, 2500);
     if (!option) return false;
     click(option);
-    await waitFor(() => input.value.trim() === wanted, 1500);
+    await waitFor(() => input.value.trim() === wanted, 300);
+    if (input.value.trim() !== wanted && globalThis.__ttdqfReact?.click(option)) await waitFor(() => input.value.trim() === wanted, 1500);   // 0.3.2: gated option
     if (input.value.trim() !== wanted) return false;
     input.blur();
     return true;
@@ -116,7 +137,7 @@
       report.warnings.push(`${label}: already had a value, left as is.`);
       return false;
     }
-    setValue(el, value);
+    await setValue(el, value);
     await sleep(60);
     if (el.value.trim() !== value) { report.warnings.push(`${label}: the page did not accept the value.`); return false; }
     if (hasError(el)) report.warnings.push(`${label}: the page shows a validation error.`);
@@ -137,7 +158,7 @@
       ok = (await fillText(row.age, p.age, `${who} · age`, report)) && ok;
       if (!(await chooseCombo(row.gender, p.gender))) { report.warnings.push(`${who} · gender: choose it manually.`); ok = false; }
       // The ID-type list is enabled only after the age is accepted; wait for it.
-      await waitFor(() => enabled(row.idType), 1500);
+      await waitFor(() => enabled(row.idType) || (row.idType?.readOnly && !row.idType.disabled), 1500);   // 0.3.2: the new combo input is readOnly by design
       if (!(await chooseCombo(row.idType, p.idType))) { report.warnings.push(`${who} · ID type: choose it manually.`); ok = false; }
       await waitFor(() => enabled(row.idNumber), 1500);
       ok = (await fillText(row.idNumber, p.idNumber, `${who} · ID number`, report)) && ok;
@@ -248,18 +269,37 @@
         // The background script reads storage (and decrypts, if a passphrase is set); the key never reaches this page.
         const { locked, pilgrims, contact } = await ext.runtime.sendMessage({ type: "READ" });
         if (locked) { setStatus("Locked. Open TTD Quick Fill from the toolbar, enter your passphrase, then try again.", "warn"); return; }
-        await fill(pilgrims.filter((p) => p.selected !== false), contact);
+        const { profiles, active } = await globalThis.TTDQF.profiles.list(ext);     // 0.4.0: the profile chosen beside the button, else the ticks
+        const chosen = globalThis.TTDQF.profiles.choose(pilgrims, profiles, active);
+        if (chosen.profile && !chosen.pilgrims.length) { setStatus(`Profile "${chosen.profile.name}" has no saved pilgrims left.`, "warn"); return; }
+        await fill(chosen.pilgrims, contact);
       } catch (err) {
         setStatus(/invalidated/i.test(err?.message) ? "Extension was updated — reload this page." : (err?.message || "Fill failed."), "error");
       }
     });
     document.body.appendChild(btn);
+    mountProfileSelect();
+  }
+
+  // 0.4.0: a profile picker beside the button, shown only when profiles exist (shared/profiles.js).
+  async function mountProfileSelect() {
+    const { profiles, active } = await globalThis.TTDQF.profiles.list(ext);
+    document.getElementById("ttdqf-profile")?.remove();
+    if (!profiles.length || !document.getElementById("ttdqf-fab")) return;
+    const sel = document.createElement("select");
+    sel.id = "ttdqf-profile";
+    sel.title = "TTD Quick Fill: which saved group to fill";
+    const opt = (value, text) => { const o = document.createElement("option"); o.value = value; o.textContent = text; return o; };
+    sel.append(opt("", "Ticked pilgrims"), ...profiles.map((p) => opt(p.id, `${p.name} (${p.pilgrimIds.length})`)));
+    sel.value = profiles.some((p) => p.id === active) ? active : "";
+    sel.addEventListener("change", () => globalThis.TTDQF.profiles.setActive(ext, sel.value));
+    document.body.appendChild(sel);
   }
 
   // The TTD site is a single-page app: watch for route changes.
   let lastPath = null;
   const observer = new MutationObserver(() => {
-    if (location.pathname !== lastPath) { lastPath = location.pathname; document.getElementById("ttdqf-fab")?.remove(); }
+    if (location.pathname !== lastPath) { lastPath = location.pathname; document.getElementById("ttdqf-fab")?.remove(); document.getElementById("ttdqf-profile")?.remove(); }
     mountButton();
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });

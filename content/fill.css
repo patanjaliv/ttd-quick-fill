@@ -17,3 +17,11 @@
 #ttdqf-status[data-state="warn"] { border-left-color: #d9a93a; }
 #ttdqf-status[data-state="error"] { border-left-color: #a10007; background: #fdf1f4; }
 #ttdqf-status[data-state="busy"] { border-left-color: #a10007; }
+/* 0.4.0: profile picker beside the button */
+#ttdqf-profile {
+  position: fixed; right: 18px; bottom: 64px; z-index: 2147483646; max-width: 220px;
+  padding: 7px 10px; border: 2px solid #f2c65d; border-radius: 999px; cursor: pointer;
+  background: #fff; color: #a10007; font: 600 13px/1.2 "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  box-shadow: 0 4px 14px rgba(161, 0, 7, .25);
+}
+#ttdqf-status { bottom: 112px; }

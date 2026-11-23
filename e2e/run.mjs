@@ -180,6 +180,32 @@ try {
   await m.click(await m.find("#ttdqf-fab")); await sleep(4000);
   out.arjithaStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
   out.arjithaState = await m.exec(`return document.getElementById('state').textContent`);
+
+  // Sixth (0.3.2): the Tiruchanur SPAT page with the site's new field component that ignores untrusted events.
+  await m.navigate("http://ttdevasthanams.ap.gov.in/spat/pilgrim-details"); await sleep(800);
+  out.spatFab = !!(await m.exec(`return document.getElementById('ttdqf-fab')`));
+  await m.click(await m.find("#ttdqf-fab")); await sleep(12000);
+  out.spatStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
+  out.spatState = await m.exec(`return document.getElementById('state').textContent`);
+  out.spatTrusted = await m.exec(`return window.__trusted`);
+  await m.screenshot(S + "out/spat.png");
+
+  // Seventh (0.4.0): a profile ("Parents" = Sita only) chosen beside the on-page button fills exactly that group.
+  await m.newTab(); await m.navigate(popupUrl); await sleep(400);
+  out.profileSaved = await m.execAsync(`const done = arguments[0]; (async () => {
+    const { pilgrims } = await globalThis.TTDQF.vault.read(browser);   // protection is on by now: read through the vault
+    const sita = pilgrims.find(p => p.name === "Sita Devi");
+    await browser.storage.local.set({ profiles: [{ id: "prof-parents", name: "Parents", pilgrimIds: [sita.id] }], activeProfile: "" });
+    done(!!sita); })().catch(e => done(String(e)));`);
+  await m.navigate("http://ttdevasthanams.ap.gov.in/pilgrim-details"); await sleep(1000);
+  out.profileSelectOptions = await m.exec(`return [...document.querySelectorAll('#ttdqf-profile option')].map(o => o.textContent)`);
+  await m.exec(`const s = document.getElementById('ttdqf-profile'); s.value = 'prof-parents'; s.dispatchEvent(new Event('change'));`); await sleep(300);
+  await m.click(await m.find("#ttdqf-fab")); await sleep(5000);
+  out.profileStatus = await m.exec(`return document.getElementById('ttdqf-status')?.textContent`);
+  out.profileState = await m.exec(`return document.getElementById('state').textContent`);
+  await m.screenshot(S + "out/profile.png");
+  await m.navigate(popupUrl); await sleep(400);
+  out.popupProfileValue = await m.exec(`return document.getElementById('profile-select').value + "|" + document.getElementById('profile-select').selectedOptions[0].textContent`);
 } catch (e) {
   out.error = String(e.stack || e);
 } finally {
@@ -198,8 +224,12 @@ const vaultOk = out.vaultStorage?.keys?.includes("vault") && !out.vaultStorage.k
 const srivaniOk = (() => { try { const s = JSON.parse(out.srivaniState); return out.srivaniFab && /Filled 2 of 2/.test(out.srivaniStatus || "")
   && s.fName1 === "Rama Krishna" && s.age1 === "34" && s.gender1 === "Male" && s.proofS1 === "aadhar" && s.proofId1 === "999912345676"
   && s.fName2 === "Sita Devi" && s.gender2 === "Female" && s.proofId2 === "999912345684"; } catch { return false; } })();
+const spatOk = (() => { try { const s = JSON.parse(out.spatState); return out.spatFab && /Filled 2 of 2/.test(out.spatStatus || "") && stateOk(out.spatState)
+  && s.rows[0].fname === "Rama Krishna" && s.rows[1].photoIdType === "Aadhaar Card" && Object.values(s.errs[0]).every((e) => e === "") && Object.values(s.errs[1]).every((e) => e === ""); } catch { return false; } })();
+const profileOk = (() => { try { const s = JSON.parse(out.profileState); return out.profileSaved === true && out.profileSelectOptions?.length === 2 && /Filled 1 of 1/.test(out.profileStatus || "")
+  && s.rows[0].fname === "Sita Devi" && s.rows[0].gender === "Female" && s.rows[1].fname === "" && out.popupProfileValue === "prof-parents|Parents (1)"; } catch { return false; } })();
 const arjithaOk = out.arjithaFab && /Filled 2 of 2/.test(out.arjithaStatus || "") && stateOk(out.arjithaState) && !/Unrecognised/.test(out.arjithaStatus || "");   // the proven adapter, not the generic layer
-out.pass = !out.error && !!arjithaOk && !!srivaniOk && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState) && !!vaultOk;
+out.pass = !out.error && !!profileOk && !!spatOk && !!arjithaOk && !!srivaniOk && out.popupListNames?.length === 2 && /Filled 2 of 2/.test(out.status || "") && stateOk(out.reactState) && filledBoth(out.messageResult) && stateOk(out.messageReactState) && !!vaultOk;
 console.log(JSON.stringify(out, null, 1));
 console.log(out.pass ? "E2E PASS" : "E2E FAIL");
 process.exit(out.pass ? 0 : 1);

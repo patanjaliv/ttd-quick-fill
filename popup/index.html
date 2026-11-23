@@ -36,6 +36,33 @@
     <p id="pilgrim-empty" class="muted">No pilgrims saved yet.</p>
   </section>
 
+  <!-- 0.4.0: profiles = named groups of the saved pilgrims -->
+  <section id="profiles-section">
+    <div class="row-between">
+      <h2>Profiles</h2>
+      <button type="button" id="add-profile" class="btn-secondary">+ New</button>
+    </div>
+    <p class="muted tiny">A named group of the pilgrims above (Family, Parents, Office trip…). Pick one and Fill uses exactly that group; "Ticked pilgrims" works as before.</p>
+    <div class="row-between">
+      <select id="profile-select" title="Profile to fill with"></select>
+      <button type="button" id="edit-profile" class="btn-secondary">Edit</button>
+      <button type="button" id="delete-profile" class="btn-danger">Delete</button>
+    </div>
+  </section>
+
+  <form id="profile-form" hidden>
+    <h2 id="profile-form-title">New profile</h2>
+    <input type="hidden" name="id">
+    <label>Profile name <input name="name" autocomplete="off" required maxlength="40" placeholder="Family"></label>
+    <p class="muted tiny">Tick the pilgrims in this profile. They are filled in the order shown.</p>
+    <ul id="profile-pilgrims" class="list"></ul>
+    <p id="profile-errors" class="error" role="alert"></p>
+    <div class="actions">
+      <button type="submit" class="btn-primary">Save profile</button>
+      <button type="button" id="cancel-profile" class="btn-secondary">Cancel</button>
+    </div>
+  </form>
+
   <form id="pilgrim-form" hidden>
     <h2 id="form-title">Add pilgrim</h2>
     <input type="hidden" name="id">
@@ -101,6 +128,7 @@
   </div>
 
   <script src="../shared/vault.js"></script>
+  <script src="../shared/profiles.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
